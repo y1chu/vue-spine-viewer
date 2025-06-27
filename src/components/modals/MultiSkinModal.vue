@@ -21,7 +21,7 @@ const emit = defineEmits(['close']);
 
 // Pre-select currently active skins
 const currentSkin = phaserStore.spineObject?.skeleton.skin;
-const initialSkins = currentSkin?.componentSkinNames || (currentSkin ? [currentSkin.name] : []);
+const initialSkins = currentSkin?.componentSkinNames || (currentSkin && currentSkin.name !== 'default' ? [currentSkin.name] : []);
 const selectedSkins = ref(initialSkins);
 
 const applySkins = () => {
@@ -31,7 +31,7 @@ const applySkins = () => {
     } else if (selectedSkins.value.length === 1) {
         skeleton.setSkinByName(selectedSkins.value[0]);
     } else {
-        const newSkin = new window.spine.Skin("composite-skin");
+        const newSkin = new spine.Skin("composite-skin");
         newSkin.componentSkinNames = selectedSkins.value; // Store for state restoration
         selectedSkins.value.forEach((skinName) => {
             const skinToAdd = skeleton.data.findSkin(skinName);
@@ -43,3 +43,44 @@ const applySkins = () => {
     emit('close');
 };
 </script>
+
+<style lang="postcss" scoped>
+/* Base popup styles are in main.css. These are specific to the skin modal. */
+.skin-list {
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid #44475a;
+    border-radius: 8px;
+    background-color: #1d1f27;
+}
+
+.skin-list-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #44475a;
+    }
+
+    & label {
+        margin-left: 10px;
+        font-weight: 400;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1em;
+    }
+
+    & input[type="checkbox"] {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+}
+</style>

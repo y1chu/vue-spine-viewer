@@ -47,7 +47,6 @@ const pngFileName = computed(() => {
     return `${files.value.pngFiles.length} images selected`;
 });
 
-
 const handleFileChange = (event, type) => {
     const fileList = event.target.files;
     if (!fileList || fileList.length === 0) return;
@@ -68,3 +67,49 @@ const loadAnimation = () => {
     }
 };
 </script>
+
+<style lang="postcss" scoped>
+.upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    &>label {
+        font-weight: 600;
+        font-size: 1.1em;
+        color: #f8f8f2;
+    }
+}
+
+.file-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background: #44475a;
+    border: 2px dashed #6272a4;
+
+    &:hover {
+        background: #52556a;
+        border-color: #9b59b6;
+    }
+}
+
+.file-button-text {
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.file-name-display {
+    font-size: 0.8em;
+    color: #bd93f9;
+    margin-top: 5px;
+    font-weight: 400;
+    pointer-events: none;
+    height: 1.2em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+</style>

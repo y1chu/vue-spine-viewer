@@ -16,3 +16,17 @@ import MultiSkinModal from '../modals/MultiSkinModal.vue';
 
 const showModal = ref(false);
 </script>
+
+<style lang="postcss" scoped>
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    &>label {
+        font-weight: 600;
+        font-size: 1.1em;
+        color: #f8f8f2;
+    }
+}
+</style>

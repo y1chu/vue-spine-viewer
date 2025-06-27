@@ -15,13 +15,17 @@ export class GameScene extends Phaser.Scene {
         this.sys.game.config.width / 2,
         this.sys.game.config.height / 2,
         'Select your Spine files to begin.',
-        { fontSize: '32px', fill: '#fff', fontFamily: 'Poppins', align: 'center' },
+        {
+          fontSize: '32px',
+          fill: '#fff',
+          fontFamily: 'Poppins',
+          align: 'center',
+        },
       )
       .setOrigin(0.5)
   }
 
   async loadAndDisplaySpine(spineFiles) {
-    // Clean up previous Spine object and resources from the store
     phaserStore.cleanup()
     activeObjectUrls.forEach(URL.revokeObjectURL)
     activeObjectUrls.length = 0
@@ -50,7 +54,9 @@ export class GameScene extends Phaser.Scene {
 
     const atlasKey = skelKey
     let modifiedAtlasTxt = atlasTxt.replace(/^\s*(\S+\.(?:png|pma\.png))$/gim, `${skelKey}_$1`)
-    this.cache.text.add(atlasKey, { data: modifiedAtlasTxt })
+    this.cache.text.add(atlasKey, {
+      data: modifiedAtlasTxt,
+    })
     this.cache.json.add(skelKey, JSON.parse(jsonTxt))
 
     this.load.once('complete', () => {
@@ -76,7 +82,6 @@ export class GameScene extends Phaser.Scene {
 
       this.fitAndCenterSpineObject(spineObj)
 
-      // *** Update the central store instead of window objects and DOM ***
       phaserStore.setSpineObject(spineObj)
       phaserStore.setSkins(spineObj.skeleton.data.skins.map((skin) => skin.name))
       phaserStore.setAnimations(animations.map((anim) => anim.name))

@@ -1,7 +1,7 @@
 <template>
     <div class="multi-track-popup">
         <h3>Multi-Track Animation</h3>
-        <div id="track-controls-container" style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="track-controls-container">
             <div v-for="i in maxTracks" :key="i" class="track-control-row">
                 <label>Track {{ i - 1 }}:</label>
                 <select class="control-dropdown track-animation-select" v-model="trackSelections[i - 1]">
@@ -44,3 +44,30 @@ const applyTracks = () => {
     emit('close');
 }
 </script>
+
+<style lang="postcss" scoped>
+/* Base popup styles are in main.css. These are specific to the track modal. */
+.track-controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.track-control-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+
+    & label {
+        flex-shrink: 0;
+        font-size: 1em;
+        font-weight: 500;
+    }
+}
+
+.track-animation-select {
+    flex-grow: 1;
+    min-width: 150px;
+}
+</style>

@@ -24,3 +24,17 @@ const reloadWithVersion = () => {
     window.location.href = `?spineVer=${encodeURIComponent(selectedSpineUrl.value)}`;
 };
 </script>
+
+<style lang="postcss" scoped>
+.version-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    &>label {
+        font-weight: 600;
+        font-size: 1.1em;
+        color: #f8f8f2;
+    }
+}
+</style>
