@@ -1,7 +1,12 @@
 <template>
   <div class="language-selection">
     <label for="languageSelect">{{ t('language.title') }}</label>
-    <select id="languageSelect" class="control-dropdown" v-model="selectedLocale" @change="changeLanguage">
+    <select
+      id="languageSelect"
+      class="control-dropdown"
+      v-model="selectedLocale"
+      @change="changeLanguage"
+    >
       <option value="en-us">{{ t('language.en') }}</option>
       <option value="zh-tw">{{ t('language.zh') }}</option>
     </select>
