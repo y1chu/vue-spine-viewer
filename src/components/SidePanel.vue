@@ -1,5 +1,6 @@
 <template>
     <div class="side-panel">
+        <LanguageSelector />
         <VersionSelector />
         <FileUploader />
         <BackgroundControls />
@@ -16,6 +17,7 @@ import BackgroundControls from './controls/BackgroundControls.vue';
 import PlaybackControls from './controls/PlaybackControls.vue';
 import MultiSkinSelector from './controls/MultiSkinSelector.vue';
 import MultiTrackSelector from './controls/MultiTrackSelector.vue';
+import LanguageSelector from './controls/LanguageSelector.vue';
 </script>
 
 <style lang="postcss" scoped>
