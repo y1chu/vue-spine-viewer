@@ -88,7 +88,7 @@ const resetTimescale = () => {
 
 #timescaleValue {
     font-weight: 600;
-    color: var(--color-violet-light);
+    color: var(--color-red-light);
     background-color: var(--color-section);
     padding: 2px 8px;
     border-radius: 6px;
@@ -100,7 +100,7 @@ const resetTimescale = () => {
     appearance: none;
     width: 100%;
     height: 8px;
-    background: var(--color-section);
+    background: var(--color-gray);
     border-radius: 5px;
     outline: none;
     cursor: pointer;
@@ -110,14 +110,14 @@ const resetTimescale = () => {
         appearance: none;
         width: 20px;
         height: 20px;
-        background: var(--color-violet-light);
+        background: var(--color-red-light);
         border-radius: 50%;
     }
 
     &::-moz-range-thumb {
         width: 20px;
         height: 20px;
-        background: var(--color-violet-light);
+        background: var(--color-red-light);
         border-radius: 50%;
         border: none;
     }

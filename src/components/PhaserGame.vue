@@ -70,7 +70,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--color-bg);
+    background-color: #111318;
     border-radius: 16px;
     box-shadow: 0 8px 30px var(--color-shadow);
     min-width: 0;

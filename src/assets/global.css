@@ -9,9 +9,12 @@
 
   --color-gray: rgba(160, 160, 160, 1);
   --color-gray-dark: rgba(50, 51, 54, 1);
+  
+  --color-red: rgba(209, 68, 63, 1);
+  --color-red-light: rgba(248, 100, 98, 1);
 
-  --color-violet: rgba(125, 87, 252, 1);
-  --color-violet-light: rgba(189, 147, 249, 1);
+  --color-green: rgba(48, 210, 115, 1);
+  --color-green-light: rgba(133, 254, 135, 1);
 
   --color-blue-hover: var(--color-blue-dark);
 

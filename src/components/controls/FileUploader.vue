@@ -91,7 +91,7 @@ const loadAnimation = () => {
 
     &:hover {
         background: var(--color-gray-dark);
-        border-color: var(--color-violet);
+        border-color: var(--color-red);
     }
 }
 
@@ -102,7 +102,7 @@ const loadAnimation = () => {
 
 .file-name-display {
     font-size: 0.8em;
-    color: var(--color-violet-light);
+    color: var(--color-red-light);
     margin-top: 5px;
     font-weight: 400;
     pointer-events: none;

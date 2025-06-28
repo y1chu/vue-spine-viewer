@@ -80,6 +80,6 @@ const applyTracks = () => {
 
 .track-animation-select {
     flex-grow: 1;
-    min-width: 150px;
+    max-width: 220px;
 }
 </style>
