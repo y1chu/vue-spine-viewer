@@ -42,6 +42,11 @@
     "spine42": "Spine 4.2",
     "reload": "以此版本重新載入"
   },
+  "language": {
+    "title": "語言",
+    "en": "英文",
+    "zh": "繁體中文"
+  },
   "game": {
     "welcome": "請選擇 Spine 檔案以開始。"
   }
