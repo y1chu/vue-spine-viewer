@@ -5,4 +5,6 @@ import App from './App.vue'
 import './assets/main.css'
 import './assets/global.css'
 
-createApp(App).mount('#app')
+import { i18n } from './i18n.js'
+
+createApp(App).use(i18n).mount('#app')

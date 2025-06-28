@@ -1,0 +1,53 @@
+{
+  "background": {
+    "customization": "Background Customization",
+    "color": "Background Color",
+    "upload_image": "Upload Background Image",
+    "clear_image": "Clear Image"
+  },
+  "uploader": {
+    "title": "Upload Animation Files",
+    "select_json": "1. Select .JSON File",
+    "select_atlas": "2. Select .ATLAS File",
+    "select_png": "3. Select .PNG Image(s)",
+    "load": "Load Animation",
+    "missing_files": "Please select all required files (.json, .atlas, and at least one .png)."
+  },
+  "multiskin": {
+    "title": "Multi-Skin Selection",
+    "open": "Open Skin Selector"
+  },
+  "multitrack": {
+    "title": "Multi-Track Animation",
+    "open": "Open Track Selector",
+    "header": "Multi-Track Animation",
+    "track_label": "Track {n}:",
+    "none": "None"
+  },
+  "modal": {
+    "select_skins": "Select Skins",
+    "apply": "Apply",
+    "close": "Close"
+  },
+  "playback": {
+    "title": "Playback Controls",
+    "pause": "Pause",
+    "play": "Continue",
+    "timescale": "Timescale",
+    "reset": "Reset Speed"
+  },
+  "version": {
+    "title": "Spine Runtime Version",
+    "spine41": "Spine 4.1",
+    "spine42": "Spine 4.2",
+    "reload": "Reload with Version"
+  },
+  "language": {
+    "title": "Language",
+    "en": "English",
+    "zh": "Traditional Chinese"
+  },
+  "game": {
+    "welcome": "Select your Spine files to begin."
+  }
+}

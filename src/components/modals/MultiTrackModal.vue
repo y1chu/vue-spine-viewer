@@ -1,85 +1,95 @@
 <template>
-    <div class="multi-track-popup" ref="popupRef">
-        <h3 ref="handleRef">Multi-Track Animation</h3>
+  <div class="multi-track-popup" ref="popupRef">
+    <h3 ref="handleRef">{{ t('multitrack.header') }}</h3>
 
-        <div class="popup-content">
-            <div class="track-controls-container">
-                <div v-for="i in maxTracks" :key="i" class="track-control-row">
-                    <label>Track {{ i - 1 }}:</label>
-                    <select class="control-dropdown track-animation-select" v-model="trackSelections[i - 1]">
-                        <option value="">None</option>
-                        <option v-for="anim in phaserStore.spineObject?.skeleton.data.animations" :key="anim.name"
-                            :value="anim.name">
-                            {{ anim.name }} ({{ anim.duration.toFixed(2) }} s)
-                        </option>
-                    </select>
-                </div>
-            </div>
+    <div class="popup-content">
+      <div class="track-controls-container">
+        <div v-for="i in maxTracks" :key="i" class="track-control-row">
+          <label>{{ t('multitrack.track_label', { n: i - 1 }) }}</label>
+          <select class="control-dropdown track-animation-select" v-model="trackSelections[i - 1]">
+            <option value="">{{ t('multitrack.none') }}</option>
+            <option
+              v-for="anim in phaserStore.spineObject?.skeleton.data.animations"
+              :key="anim.name"
+              :value="anim.name"
+            >
+              {{ anim.name }} ({{ anim.duration.toFixed(2) }} s)
+            </option>
+          </select>
         </div>
-
-        <div class="popup-button-container">
-            <button @click="applyTracks" class="control-button apply-button">Apply</button>
-            <button @click="$emit('close')" class="control-button close-button">Close</button>
-        </div>
+      </div>
     </div>
+
+    <div class="popup-button-container">
+      <button @click="applyTracks" class="control-button apply-button">
+        {{ t('modal.apply') }}
+      </button>
+      <button @click="$emit('close')" class="control-button close-button">
+        {{ t('modal.close') }}
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { phaserStore } from '@/store/phaserStore.js';
-import { useDraggable } from '@/composables/useDraggable.js';
-const emit = defineEmits(['close']);
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { phaserStore } from '@/store/phaserStore.js'
+import { useDraggable } from '@/composables/useDraggable.js'
+const emit = defineEmits(['close'])
 
-const popupRef = ref(null);
-const handleRef = ref(null);
-useDraggable(popupRef, handleRef, 'multi-track-modal');
+const { t } = useI18n()
 
-const maxTracks = 5;
-const trackSelections = ref([]);
+const popupRef = ref(null)
+const handleRef = ref(null)
+useDraggable(popupRef, handleRef, 'multi-track-modal')
+
+const maxTracks = 5
+const trackSelections = ref([])
 
 // Initialize selections with current state
-const tracks = phaserStore.spineObject?.animationState.tracks;
+const tracks = phaserStore.spineObject?.animationState.tracks
 for (let i = 0; i < maxTracks; i++) {
-    trackSelections.value[i] = tracks?.[i]?.animation?.name || '';
+  trackSelections.value[i] = tracks?.[i]?.animation?.name || ''
 }
 
 const applyTracks = () => {
-    const { animationState } = phaserStore.spineObject;
-    for (let i = 0; i < maxTracks; i++) {
-        const selectedAnimation = trackSelections.value[i];
-        if (selectedAnimation) {
-            animationState.setAnimation(i, selectedAnimation, true);
-        } else {
-            animationState.setEmptyAnimation(i, 0.1);
-        }
+  const { animationState } = phaserStore.spineObject
+  for (let i = 0; i < maxTracks; i++) {
+    const selectedAnimation = trackSelections.value[i]
+    if (selectedAnimation) {
+      animationState.setAnimation(i, selectedAnimation, true)
+    } else {
+      animationState.setEmptyAnimation(i, 0.1)
     }
-    emit('close');
+  }
+  emit('close')
 }
 </script>
 
 <style lang="postcss" scoped>
 /* Base popup styles are in main.css. These are specific to the track modal. */
 .track-controls-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .track-control-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
 
-    & label {
-        flex-shrink: 0;
-        font-size: 1em;
-        font-weight: 500;
-    }
+  & label {
+    flex-shrink: 0;
+    font-size: 1em;
+    font-weight: 500;
+  }
 }
 
 .track-animation-select {
-    flex-grow: 1;
-    max-width: 220px;
+  flex-grow: 1;
+  max-width: 220px;
 }
 </style>

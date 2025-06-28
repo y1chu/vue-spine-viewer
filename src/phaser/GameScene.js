@@ -1,5 +1,6 @@
 import { toText, toURL } from './utils.js'
 import { phaserStore } from '../store/phaserStore.js'
+import { i18n } from '../i18n.js'
 
 let activeObjectUrls = []
 
@@ -15,7 +16,7 @@ export class GameScene extends Phaser.Scene {
       .text(
         this.sys.game.config.width / 2,
         this.sys.game.config.height / 2,
-        'Select your Spine files to begin.',
+        i18n.global.t('game.welcome'),
         {
           fontSize: '32px',
           fill: '#fff',

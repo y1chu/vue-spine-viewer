@@ -1,0 +1,53 @@
+{
+  "background": {
+    "customization": "背景自訂",
+    "color": "背景顏色",
+    "upload_image": "上傳背景圖片",
+    "clear_image": "清除圖片"
+  },
+  "uploader": {
+    "title": "上傳動畫檔案",
+    "select_json": "1. 選擇 .JSON 檔案",
+    "select_atlas": "2. 選擇 .ATLAS 檔案",
+    "select_png": "3. 選擇 .PNG 圖片",
+    "load": "載入動畫",
+    "missing_files": "請選擇所有必要的檔案 (.json、.atlas 及至少一個 .png)。"
+  },
+  "multiskin": {
+    "title": "多皮膚選擇",
+    "open": "開啟皮膚選擇器"
+  },
+  "multitrack": {
+    "title": "多軌動畫",
+    "open": "開啟軌道選擇器",
+    "header": "多軌動畫",
+    "track_label": "軌道 {n}:",
+    "none": "無"
+  },
+  "modal": {
+    "select_skins": "選擇皮膚",
+    "apply": "套用",
+    "close": "關閉"
+  },
+  "playback": {
+    "title": "播放控制",
+    "pause": "暫停",
+    "play": "繼續",
+    "timescale": "時間倍率",
+    "reset": "重設速度"
+  },
+  "version": {
+    "title": "Spine 執行時版本",
+    "spine41": "Spine 4.1",
+    "spine42": "Spine 4.2",
+    "reload": "以此版本重新載入"
+  },
+  "language": {
+    "title": "語言",
+    "en": "英文",
+    "zh": "繁體中文"
+  },
+  "game": {
+    "welcome": "請選擇 Spine 檔案以開始。"
+  }
+}
