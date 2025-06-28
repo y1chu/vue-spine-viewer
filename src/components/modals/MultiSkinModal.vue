@@ -62,9 +62,9 @@ const applySkins = () => {
     margin: 0;
     max-height: 350px;
     overflow-y: auto;
-    border: 1px solid #44475a;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
-    background-color: #1d1f27;
+    background-color: var(--color-bg);
 }
 
 .skin-list-item {
@@ -75,7 +75,7 @@ const applySkins = () => {
     transition: background-color 0.2s ease;
 
     &:hover {
-        background-color: #44475a;
+        background-color: var(--color-section);
     }
 
     & label {

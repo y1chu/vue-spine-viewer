@@ -67,7 +67,7 @@ const resetTimescale = () => {
     &>label {
         font-weight: 600;
         font-size: 1.1em;
-        color: #f8f8f2;
+        color: var(--color-white);
     }
 }
 
@@ -88,8 +88,8 @@ const resetTimescale = () => {
 
 #timescaleValue {
     font-weight: 600;
-    color: #bd93f9;
-    background-color: #44475a;
+    color: var(--color-violet-light);
+    background-color: var(--color-section);
     padding: 2px 8px;
     border-radius: 6px;
     font-size: 0.9em;
@@ -100,7 +100,7 @@ const resetTimescale = () => {
     appearance: none;
     width: 100%;
     height: 8px;
-    background: #44475a;
+    background: var(--color-section);
     border-radius: 5px;
     outline: none;
     cursor: pointer;
@@ -110,14 +110,14 @@ const resetTimescale = () => {
         appearance: none;
         width: 20px;
         height: 20px;
-        background: #bd93f9;
+        background: var(--color-violet-light);
         border-radius: 50%;
     }
 
     &::-moz-range-thumb {
         width: 20px;
         height: 20px;
-        background: #bd93f9;
+        background: var(--color-violet-light);
         border-radius: 50%;
         border: none;
     }

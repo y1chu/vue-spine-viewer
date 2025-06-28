@@ -70,9 +70,9 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #111318;
+    background-color: var(--color-bg);
     border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 30px var(--color-shadow);
     min-width: 0;
     overflow: hidden;
 

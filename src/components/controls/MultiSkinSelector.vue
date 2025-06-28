@@ -26,7 +26,7 @@ const showModal = ref(false);
     &>label {
         font-weight: 600;
         font-size: 1.1em;
-        color: #f8f8f2;
+        color: var(--color-white);
     }
 }
 </style>

@@ -20,18 +20,18 @@ import MultiTrackSelector from './controls/MultiTrackSelector.vue';
 .side-panel {
     width: 340px;
     flex-shrink: 0;
-    background-color: #282a36;
+    background-color: var(--color-section);
     border-radius: 16px;
     padding: 25px;
     display: flex;
     flex-direction: column;
     gap: 25px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 30px var(--color-shadow);
     overflow-y: auto;
 
     /* Use :deep to style the root element of child components */
     & :deep(> div) {
-        border-top: 1px solid #44475a;
+        border-top: 1px solid var(--color-border);
         padding-top: 25px;
     }
 

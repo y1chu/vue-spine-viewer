@@ -77,7 +77,7 @@ const loadAnimation = () => {
     &>label {
         font-weight: 600;
         font-size: 1.1em;
-        color: #f8f8f2;
+        color: var(--color-white);
     }
 }
 
@@ -86,12 +86,12 @@ const loadAnimation = () => {
     flex-direction: column;
     align-items: center;
     padding: 10px;
-    background: #44475a;
-    border: 2px dashed #6272a4;
+    background: var(--color-section);
+    border: 2px dashed var(--color-gray-dark);
 
     &:hover {
-        background: #52556a;
-        border-color: #9b59b6;
+        background: var(--color-gray-dark);
+        border-color: var(--color-violet);
     }
 }
 
@@ -102,7 +102,7 @@ const loadAnimation = () => {
 
 .file-name-display {
     font-size: 0.8em;
-    color: #bd93f9;
+    color: var(--color-violet-light);
     margin-top: 5px;
     font-weight: 400;
     pointer-events: none;
