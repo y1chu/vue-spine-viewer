@@ -1,12 +1,17 @@
 <template>
-    <div class="multi-skin-popup">
-        <h3>Select Skins</h3>
-        <div class="skin-list">
-            <div v-for="skinName in phaserStore.skins" :key="skinName" class="skin-list-item">
-                <input type="checkbox" :id="`skin-checkbox-${skinName}`" :value="skinName" v-model="selectedSkins" />
-                <label :for="`skin-checkbox-${skinName}`">{{ skinName }}</label>
+    <div class="multi-skin-popup" ref="popupRef">
+        <h3 ref="handleRef">Select Skins</h3>
+
+        <div class="popup-content">
+            <div class="skin-list">
+                <div v-for="skinName in phaserStore.skins" :key="skinName" class="skin-list-item">
+                    <input type="checkbox" :id="`skin-checkbox-${skinName}`" :value="skinName"
+                        v-model="selectedSkins" />
+                    <label :for="`skin-checkbox-${skinName}`">{{ skinName }}</label>
+                </div>
             </div>
         </div>
+
         <div class="popup-button-container">
             <button @click="applySkins" class="control-button apply-button">Apply</button>
             <button @click="$emit('close')" class="control-button close-button">Close</button>
@@ -17,7 +22,12 @@
 <script setup>
 import { ref } from 'vue';
 import { phaserStore } from '@/store/phaserStore.js';
+import { useDraggable } from '@/composables/useDraggable.js';
 const emit = defineEmits(['close']);
+
+const popupRef = ref(null);
+const handleRef = ref(null);
+useDraggable(popupRef, handleRef, 'multi-skin-modal');
 
 // Pre-select currently active skins
 const currentSkin = phaserStore.spineObject?.skeleton.skin;

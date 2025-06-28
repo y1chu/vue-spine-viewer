@@ -1,15 +1,22 @@
 <template>
-    <div class="multi-track-popup">
-        <h3>Multi-Track Animation</h3>
-        <div class="track-controls-container">
-            <div v-for="i in maxTracks" :key="i" class="track-control-row">
-                <label>Track {{ i - 1 }}:</label>
-                <select class="control-dropdown track-animation-select" v-model="trackSelections[i - 1]">
-                    <option value="">None</option>
-                    <option v-for="anim in phaserStore.animations" :key="anim" :value="anim">{{ anim }}</option>
-                </select>
+    <div class="multi-track-popup" ref="popupRef">
+        <h3 ref="handleRef">Multi-Track Animation</h3>
+
+        <div class="popup-content">
+            <div class="track-controls-container">
+                <div v-for="i in maxTracks" :key="i" class="track-control-row">
+                    <label>Track {{ i - 1 }}:</label>
+                    <select class="control-dropdown track-animation-select" v-model="trackSelections[i - 1]">
+                        <option value="">None</option>
+                        <option v-for="anim in phaserStore.spineObject?.skeleton.data.animations" :key="anim.name"
+                            :value="anim.name">
+                            {{ anim.name }} ({{ anim.duration.toFixed(2) }} s)
+                        </option>
+                    </select>
+                </div>
             </div>
         </div>
+
         <div class="popup-button-container">
             <button @click="applyTracks" class="control-button apply-button">Apply</button>
             <button @click="$emit('close')" class="control-button close-button">Close</button>
@@ -20,7 +27,12 @@
 <script setup>
 import { ref } from 'vue';
 import { phaserStore } from '@/store/phaserStore.js';
+import { useDraggable } from '@/composables/useDraggable.js';
 const emit = defineEmits(['close']);
+
+const popupRef = ref(null);
+const handleRef = ref(null);
+useDraggable(popupRef, handleRef, 'multi-track-modal');
 
 const maxTracks = 5;
 const trackSelections = ref([]);

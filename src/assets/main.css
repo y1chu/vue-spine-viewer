@@ -34,105 +34,123 @@ body {
 /* --- COMMON CONTROL STYLES --- */
 /* Base styles for buttons and dropdowns used across multiple components */
 .control-dropdown {
-  width: 100%;
-  padding: 12px 20px;
-  font-size: 1em;
-  font-weight: 500;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: #44475a;
-  color: #f8f8f2;
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%23f8f8f2" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 15px center;
+	width: 100%;
+	padding: 12px 20px;
+	font-size: 1em;
+	font-weight: 500;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	background-color: #44475a;
+	color: #f8f8f2;
+	-webkit-appearance: none;
+	appearance: none;
+	background-image: url('data:image/svg+xml;utf8,<svg fill="%23f8f8f2" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+	background-repeat: no-repeat;
+	background-position: right 15px center;
 }
 
 .control-button {
-  width: 100%;
-  padding: 12px 20px;
-  font-size: 1em;
-  font-weight: 500;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(145deg, #7159c1, #9b59b6);
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-    filter: brightness(1.1);
-  }
-
-  &:disabled {
-    background: #44475a;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  /* Specific button types */
-  &.load-button {
-    margin-top: 10px;
-    background: linear-gradient(145deg, #50fa7b, #2bcb4a);
-    color: #282a36;
-  }
-
-  &.apply-button {
-    background: linear-gradient(145deg, #50fa7b, #2bcb4a);
-    color: #282a36;
-  }
-
-  &.close-button {
-    background: linear-gradient(145deg, #ff5555, #b72c2c);
-    color: #fff;
-  }
+	width: 100%;
+	padding: 12px 20px;
+	font-size: 1em;
+	font-weight: 500;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	text-align: center;
+	font-family: 'Poppins', sans-serif;
+	background: linear-gradient(145deg, #7159c1, #9b59b6);
+	color: #fff;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* --- COMMON POPUP STYLES --- */
+.control-button:hover:not(:disabled) {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+	filter: brightness(1.1);
+}
+
+.control-button:disabled {
+	background: #44475a;
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+/* Specific button types */
+.control-button.load-button {
+	margin-top: 10px;
+	background: linear-gradient(145deg, #50fa7b, #2bcb4a);
+	color: #282a36;
+}
+
+.control-button.apply-button {
+	background: linear-gradient(145deg, #50fa7b, #2bcb4a);
+	color: #282a36;
+}
+
+.control-button.close-button {
+	background: linear-gradient(145deg, #ff5555, #b72c2c);
+	color: #fff;
+}
+
+/* --- (NEW) COMMON POPUP STYLES --- */
 .multi-track-popup,
 .multi-skin-popup {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #282a36;
-  border: 1px solid #44475a;
-  border-radius: 16px;
-  padding: 25px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-  min-width: 320px;
-  max-width: 90%;
-  max-height: 90vh;
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background-color: #282a36;
+	border-radius: 16px; /* Increased for a softer look */
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+	min-width: 350px; /* Increased for better spacing */
+	max-width: 90%;
+	height: auto;
+	max-height: 90vh;
+	/* Removed border and padding from the main container */
+	border: 1px solid #5a5e73; /* A slightly lighter border */
+	overflow: hidden; /* Important for containing the child elements */
+}
 
-  & h3 {
-    color: #f8f8f2;
-    margin-top: 0;
-    margin-bottom: 10px;
-    text-align: center;
-    border-bottom: 1px solid #44475a;
-    padding-bottom: 10px;
-  }
+/* The Draggable Header */
+.multi-track-popup h3,
+.multi-skin-popup h3 {
+	padding: 15px 25px;
+	margin: 0; /* REMOVED negative margins */
+	background-color: #44475a;
+	border-bottom: 1px solid #1d1f27;
+	user-select: none;
+	cursor: move; /* Indicates it's draggable */
+	color: #f8f8f2;
+	text-align: center;
+	font-weight: 600;
+	/* The border-radius is handled by the parent's `overflow: hidden` */
+}
 
-  & .popup-button-container {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
+/* A new wrapper for the main content of the popup */
+.popup-content {
+	padding: 20px 25px;
+	overflow-y: auto;
+	flex-grow: 1; /* Allows content to fill available space */
+}
 
-    & .control-button {
-      flex-grow: 1;
-    }
-  }
+/* The footer area for buttons */
+.popup-button-container {
+	display: flex;
+	gap: 15px;
+	margin-top: auto; /* Pushes buttons to the bottom */
+	padding: 20px 25px;
+	background-color: #282a36;
+	border-top: 1px solid #44475a;
+}
+
+.popup-button-container .control-button {
+	flex-grow: 1;
 }
 
 /* --- RESPONSIVE STYLES --- */
