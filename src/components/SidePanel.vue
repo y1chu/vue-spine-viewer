@@ -2,6 +2,7 @@
     <div class="side-panel">
         <VersionSelector />
         <FileUploader />
+        <BackgroundControls />
         <MultiSkinSelector />
         <MultiTrackSelector />
         <PlaybackControls />
@@ -11,6 +12,7 @@
 <script setup>
 import VersionSelector from './controls/VersionSelector.vue';
 import FileUploader from './controls/FileUploader.vue';
+import BackgroundControls from './controls/BackgroundControls.vue';
 import PlaybackControls from './controls/PlaybackControls.vue';
 import MultiSkinSelector from './controls/MultiSkinSelector.vue';
 import MultiTrackSelector from './controls/MultiTrackSelector.vue';

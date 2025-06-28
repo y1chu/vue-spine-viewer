@@ -7,6 +7,7 @@ export class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' })
     this.welcomeText = null
+    this.backgroundImage = null
   }
 
   create() {
@@ -108,5 +109,50 @@ export class GameScene extends Phaser.Scene {
 
     spineObj.x = this.cameras.main.centerX - centerX_relative * spineObj.scaleX
     spineObj.y = this.cameras.main.centerY - centerY_relative * spineObj.scaleY
+  }
+
+  setBackgroundColor(hexColor) {
+    const color = Phaser.Display.Color.ValueToColor(hexColor)
+    this.cameras.main.setBackgroundColor(color)
+  }
+
+  setBackgroundImage(file) {
+    if (this.backgroundImage) {
+      this.backgroundImage.destroy()
+      this.backgroundImage = null
+    }
+
+    const key = 'bg-image'
+    const url = URL.createObjectURL(file)
+
+    if (this.textures.exists(key)) {
+      this.textures.remove(key)
+    }
+
+    this.load.image(key, url)
+    this.load.once('complete', () => {
+      this.backgroundImage = this.add.image(
+        this.cameras.main.width / 2,
+        this.cameras.main.height / 2,
+        key,
+      )
+      this.backgroundImage.setOrigin(0.5, 0.5)
+
+      const scaleX = this.cameras.main.width / this.backgroundImage.width
+      const scaleY = this.cameras.main.height / this.backgroundImage.height
+      const scale = Math.max(scaleX, scaleY)
+      this.backgroundImage.setScale(scale)
+
+      this.backgroundImage.setDepth(-1)
+      URL.revokeObjectURL(url)
+    })
+    this.load.start()
+  }
+
+  clearBackgroundImage() {
+    if (this.backgroundImage) {
+      this.backgroundImage.destroy()
+      this.backgroundImage = null
+    }
   }
 }
