@@ -47,6 +47,10 @@
     "en": "英文",
     "zh": "繁體中文"
   },
+  "github": {
+    "title": "意見回饋",
+    "button": "前往 GitHub"
+  },
   "game": {
     "welcome": "請選擇 Spine 檔案以開始。"
   }

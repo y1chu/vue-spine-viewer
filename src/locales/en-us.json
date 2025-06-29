@@ -47,6 +47,10 @@
     "en": "English",
     "zh": "Traditional Chinese"
   },
+  "github": {
+    "title": "Feedback",
+    "button": "View on GitHub"
+  },
   "game": {
     "welcome": "Select your Spine files to begin."
   }

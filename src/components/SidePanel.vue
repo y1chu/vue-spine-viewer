@@ -7,6 +7,7 @@
     <MultiSkinSelector />
     <MultiTrackSelector />
     <PlaybackControls />
+    <GitHubLink />
   </div>
 </template>
 
@@ -18,6 +19,7 @@ import PlaybackControls from './controls/PlaybackControls.vue'
 import MultiSkinSelector from './controls/MultiSkinSelector.vue'
 import MultiTrackSelector from './controls/MultiTrackSelector.vue'
 import LanguageSelector from './controls/LanguageSelector.vue'
+import GitHubLink from './controls/GitHubLink.vue'
 </script>
 
 <style lang="postcss" scoped>
