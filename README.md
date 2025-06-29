@@ -1,6 +1,8 @@
 # Vue Spine Viewer
 A web-based viewer for [Spine](http://esotericsoftware.com/) animations, built with Vue 3, Vite, and Phaser. This tool allows you to load and interact with your Spine animations directly in the browser, offering a range of controls for skins, animations, playback speed, and more.
 
+![Vue Spine Viewer](src/assets/img/preview.png)
+
 ## Features
 -   **Load Custom Animations**: Upload your `.json`, `.atlas`, and `.png` files to view your Spine animations.
 -   **Runtime Version Switching**: Easily switch between different Spine runtime versions (e.g., 4.1, 4.2) and reload the application.
