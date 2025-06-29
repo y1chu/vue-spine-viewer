@@ -1,5 +1,6 @@
 # Vue Spine Viewer
 [![Netlify Status](https://api.netlify.com/api/v1/badges/25cb0fdd-3969-4bd6-84d5-1e46c78e2e7d/deploy-status)](https://app.netlify.com/projects/spine-viewer-vue/deploys)
+
 A web-based viewer for [Spine](http://esotericsoftware.com/) animations, built with Vue 3, Vite, and Phaser. This tool allows you to load and interact with your Spine animations directly in the browser, offering a range of controls for skins, animations, playback speed, and more.
 
 ![Vue Spine Viewer](src/assets/img/preview.png)
