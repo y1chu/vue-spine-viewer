@@ -36,8 +36,6 @@ To get the project running on your local machine, follow these steps:
 
 Starts the development server with hot-reloading. This is the recommended command for development.
 
-Compiles and minifies the application for production. The build artifacts will be stored in the `dist/` directory.
-
 ### `npm run format`
 
 Formats the source code using Prettier.
