@@ -47,7 +47,7 @@ Formats the source code using Prettier.
 Lints the source code using ESLint.
                                                                                     
 ## How to Use the Viewer
-1.  (Optional) Select your desired Spine runtime version from the dropdown and click "Rsddeload with Version".
+1.  (Optional) Select your desired Spine runtime version from the dropdown and click "Reload with Version".
 2.  Use the "Upload Animation Files" section to select your Spine `.json`, `.atlas`, and ixmage (`.png`) files.
 3.  Click the "Load Animation" button.
 4.  Once loaded, use the controls on the side panel to interact with your animation (change skins, play different animations, adjust speed, etc.).
