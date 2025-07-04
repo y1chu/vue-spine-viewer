@@ -51,8 +51,7 @@ const launchGame = async () => {
 
     game = new Phaser.Game(gameConfig)
     phaserStore.setGameInstance(game)
-    console.error(game);
-
+    // console.error(game)
   } catch (error) {
     console.error('Failed to load Spine Phaser runtime.', error)
   }

@@ -43,6 +43,7 @@ export class GameScene extends Phaser.Scene {
     activeObjectUrls.forEach(URL.revokeObjectURL)
     activeObjectUrls.length = 0
 
+    // eslint-disable-next-line no-unused-vars
     const [jsonTxt, atlasTxt] = await Promise.all([
       toText(spineFiles.jsonFile),
       toText(spineFiles.atlasFile),
@@ -86,12 +87,12 @@ export class GameScene extends Phaser.Scene {
       )
     }
 
-    const jsonURL = toURL(spineFiles.jsonFile);
+    const jsonURL = toURL(spineFiles.jsonFile)
     this.load.spineJson(skelKey, jsonURL)
 
     // NOTE: 使用 spineAtlas 匯入 atlas 資料方便開啟 PMA
     // @see https://g.co/gemini/share/51c5c2c841e2
-    const atlasURL = toURL(spineFiles.atlasFile);
+    const atlasURL = toURL(spineFiles.atlasFile)
     this.load.spineAtlas(atlasKey, atlasURL, true)
 
     this.load.once('complete', () => {
