@@ -72,7 +72,7 @@ const handleFileChange = (event, type) => {
 
   if (type === 'json') files.value.jsonFile = fileList[0]
   if (type === 'atlas') files.value.atlasFile = fileList[0]
-  if (type === 'png') files.value.pngFiles = fileList
+  if (type === 'png') files.value.pngFiles = Array.from(fileList)
 }
 
 const loadAnimation = () => {

@@ -38,28 +38,39 @@ export class GameScene extends Phaser.Scene {
     ])
 
     const skelKey = `spine_${Date.now()}`
-    const pageNames = [
-      ...new Set(atlasTxt.match(/^\s*(\S+\.(?:png|pma\.png))/gim)?.map((l) => l.trim()) || []),
-    ]
+    const atlasKey = skelKey
+    const pageRegex = /^\s*(\S+\.(?:png|pma\.png))/gim
+
+    const pageNames = [...atlasTxt.matchAll(pageRegex)]
+      .map((m) => m[1])
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+
+    const missing = []
 
     for (const page of pageNames) {
-      const file = [...spineFiles.pngFiles].find((f) => f.name === page)
+      const file = spineFiles.pngFiles.find((f) => f.name === page)
       if (!file) {
-        console.warn(`⚠️ PNG '${page}' is referenced in the atlas but was not selected.`)
+        missing.push(page)
         continue
       }
+
       const url = toURL(file)
-      const phaserKey = `${skelKey}!${skelKey}_${page}`
+      const phaserKey = `${skelKey}!${page}`
       activeObjectUrls.push(url)
       this.load.image(phaserKey, url)
     }
 
-    const atlasKey = skelKey
-    let modifiedAtlasTxt = atlasTxt.replace(/^\s*(\S+\.(?:png|pma\.png))$/gim, `${skelKey}_$1`)
-    this.cache.text.add(atlasKey, {
-      data: modifiedAtlasTxt,
-    })
+    this.cache.text.add(atlasKey, { data: atlasTxt })
     this.cache.json.add(skelKey, JSON.parse(jsonTxt))
+
+    if (missing.length) {
+      console.warn('⚠️ Missing PNG files:', missing.join(', '))
+      alert(
+        `These texture pages are referenced in the atlas but were not selected:\n` +
+          missing.join('\n'),
+      )
+    }
 
     this.load.once('complete', () => {
       const spineObj = this.add.spine(
@@ -74,19 +85,28 @@ export class GameScene extends Phaser.Scene {
         this.welcomeText = null
       }
 
-      spineObj.skeleton.setSkinByName('default')
+      const { skins } = spineObj.skeleton.data
+      const defaultSkin = spineObj.skeleton.data.findSkin('default')
+      if (skins.length > 1) {
+        const composite = new spine.Skin('auto-skin')
+        if (defaultSkin) composite.addSkin(defaultSkin)
+        const extraSkin = skins.find((s) => s.name !== 'default')
+        if (extraSkin) composite.addSkin(extraSkin)
+        composite.componentSkinNames = [defaultSkin?.name, extraSkin?.name].filter(Boolean)
+        spineObj.skeleton.setSkin(composite)
+      } else if (defaultSkin) {
+        spineObj.skeleton.setSkin(defaultSkin)
+      }
       spineObj.skeleton.setSlotsToSetupPose()
 
-      const animations = spineObj.skeleton.data.animations
-      if (animations.length) {
-        spineObj.animationState.setAnimation(0, animations[0].name, true)
-      }
+      const anims = spineObj.skeleton.data.animations
+      if (anims.length) spineObj.animationState.setAnimation(0, anims[0].name, true)
 
       this.fitAndCenterSpineObject(spineObj)
 
       phaserStore.setSpineObject(spineObj)
-      phaserStore.setSkins(spineObj.skeleton.data.skins.map((skin) => skin.name))
-      phaserStore.setAnimations(animations.map((anim) => anim.name))
+      phaserStore.setSkins(spineObj.skeleton.data.skins.map((s) => s.name))
+      phaserStore.setAnimations(anims.map((a) => a.name))
     })
 
     this.load.start()
