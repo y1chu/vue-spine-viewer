@@ -63,6 +63,7 @@ const applyTracks = () => {
       animationState.setEmptyAnimation(i, 0.1)
     }
   }
+  phaserStore.spineObject.scene.fitAndCenterSpineObject(phaserStore.spineObject)
   emit('close')
 }
 </script>

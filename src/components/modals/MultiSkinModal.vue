@@ -62,6 +62,7 @@ const applySkins = () => {
     skeleton.setSkin(newSkin)
   }
   skeleton.setSlotsToSetupPose()
+  phaserStore.spineObject.scene.fitAndCenterSpineObject(phaserStore.spineObject)
   emit('close')
 }
 </script>

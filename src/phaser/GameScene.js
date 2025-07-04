@@ -25,6 +25,17 @@ export class GameScene extends Phaser.Scene {
         },
       )
       .setOrigin(0.5)
+
+    this.scale.on('resize', this.handleResize, this)
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off('resize', this.handleResize, this)
+    })
+  }
+
+  handleResize() {
+    if (phaserStore.spineObject) {
+      this.fitAndCenterSpineObject(phaserStore.spineObject)
+    }
   }
 
   async loadAndDisplaySpine(spineFiles) {
@@ -68,7 +79,7 @@ export class GameScene extends Phaser.Scene {
       console.warn('⚠️ Missing PNG files:', missing.join(', '))
       alert(
         `These texture pages are referenced in the atlas but were not selected:\n` +
-          missing.join('\n'),
+        missing.join('\n'),
       )
     }
 
