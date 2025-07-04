@@ -6,6 +6,7 @@ export const phaserStore = reactive({
   skins: [],
   animations: [],
   isAnimationLoaded: false,
+  scaleFactor: 0.9,
 
   setGameInstance(game) {
     this.gameInstance = game
@@ -22,6 +23,10 @@ export const phaserStore = reactive({
 
   setAnimations(animationNames) {
     this.animations = animationNames
+  },
+
+  setScaleFactor(factor) {
+    this.scaleFactor = factor
   },
 
   cleanup() {
