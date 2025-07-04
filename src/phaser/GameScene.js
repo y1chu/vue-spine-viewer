@@ -59,6 +59,7 @@ export class GameScene extends Phaser.Scene {
 
     const missing = []
 
+    // NOTE: 需要手動匯入圖片
     for (const page of pageNames) {
       const file = spineFiles.pngFiles.find((f) => f.name === page)
       if (!file) {
@@ -72,8 +73,10 @@ export class GameScene extends Phaser.Scene {
       this.load.image(phaserKey, url)
     }
 
-    this.cache.text.add(atlasKey, { data: atlasTxt })
-    this.cache.json.add(skelKey, JSON.parse(jsonTxt))
+    // NOTE: 不用 cache 匯入，原因是手動寫入 cache 會導致 obj 沒吃到 PMA 而在 spine 物件接縫處有黑邊
+    // this.cache.text.add(atlasKey, { data: atlasTxt })
+    // this.cache.json.add(skelKey, JSON.parse(jsonTxt))
+    // console.error(jsonTxt, pageNames);
 
     if (missing.length) {
       console.warn('⚠️ Missing PNG files:', missing.join(', '))
@@ -83,6 +86,14 @@ export class GameScene extends Phaser.Scene {
       )
     }
 
+    const jsonURL = toURL(spineFiles.jsonFile);
+    this.load.spineJson(skelKey, jsonURL)
+
+    // NOTE: 使用 spineAtlas 匯入 atlas 資料方便開啟 PMA
+    // @see https://g.co/gemini/share/51c5c2c841e2
+    const atlasURL = toURL(spineFiles.atlasFile);
+    this.load.spineAtlas(atlasKey, atlasURL, true)
+
     this.load.once('complete', () => {
       const spineObj = this.add.spine(
         this.cameras.main.centerX,
@@ -90,6 +101,9 @@ export class GameScene extends Phaser.Scene {
         skelKey,
         atlasKey,
       )
+
+      // NOTE: 如果 spine 物件有 PMA 會是 true
+      // console.error('Spine Object PMA:', spineObj.premultipliedAlpha);
 
       if (this.welcomeText) {
         this.welcomeText.destroy()
