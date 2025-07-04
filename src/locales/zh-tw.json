@@ -36,6 +36,10 @@
     "timescale": "時間倍率",
     "reset": "重設速度"
   },
+  "scale": {
+    "title": "縮放調整",
+    "reset": "重設縮放"
+  },
   "version": {
     "title": "Spine 執行時版本",
     "spine41": "Spine 4.1",

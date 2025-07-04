@@ -79,7 +79,7 @@ export class GameScene extends Phaser.Scene {
       console.warn('⚠️ Missing PNG files:', missing.join(', '))
       alert(
         `These texture pages are referenced in the atlas but were not selected:\n` +
-        missing.join('\n'),
+          missing.join('\n'),
       )
     }
 
@@ -132,7 +132,8 @@ export class GameScene extends Phaser.Scene {
 
     if (bounds.size.x > 0 && bounds.size.y > 0) {
       const scale =
-        Math.min(this.scale.width / bounds.size.x, this.scale.height / bounds.size.y) * 0.9
+        Math.min(this.scale.width / bounds.size.x, this.scale.height / bounds.size.y) *
+        phaserStore.scaleFactor
       spineObj.setScale(scale)
     }
 
