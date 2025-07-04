@@ -38,7 +38,7 @@ const launchGame = async () => {
     await loadSpineRuntime(spineVersionUrl)
 
     const gameConfig = {
-      type: Phaser.WEBGL,
+      renderType: Phaser.WEBGL,
       parent: 'game-container',
       width: 1280,
       height: 720,
@@ -51,6 +51,7 @@ const launchGame = async () => {
 
     game = new Phaser.Game(gameConfig)
     phaserStore.setGameInstance(game)
+    // console.error(game)
   } catch (error) {
     console.error('Failed to load Spine Phaser runtime.', error)
   }
