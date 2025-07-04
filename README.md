@@ -58,6 +58,4 @@ Found a [bug](.github/ISSUE_TEMPLATE/bug_report.md) or have a [feature](.github/
 
 ## Known Issues
 
-1. Currently does not support different skins on the same skeleton. Examples of non-working projects:
-    - https://en.esotericsoftware.com/spine-examples-mix-and-match
-    - https://en.esotericsoftware.com/spine-examples-chibi-stickers
+1. Nothing for now! Please submit an [issue request](.github/ISSUE_TEMPLATE/bug_report.md) if you encounter any bug.
