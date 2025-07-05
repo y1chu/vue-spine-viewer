@@ -51,7 +51,7 @@ export class GameScene extends Phaser.Scene {
 
     const skelKey = `spine_${Date.now()}`
     const atlasKey = skelKey
-    const pageRegex = /^\s*(\S+\.(?:png|pma\.png))/gim
+    const pageRegex = /^\s*([^\r\n]+?\.(?:png|pma\.png))\s*$/gim
 
     const pageNames = [...atlasTxt.matchAll(pageRegex)]
       .map((m) => m[1])
