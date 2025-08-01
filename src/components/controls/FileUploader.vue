@@ -92,14 +92,18 @@ const handleDrop = (event) => {
   const dropped = Array.from(event.dataTransfer.files)
   if (!dropped.length) return
 
+  // Replace previously selected files when dropping again
+  files.value.jsonFile = null
+  files.value.atlasFile = null
+  files.value.pngFiles = []
+
   for (const file of dropped) {
     const name = file.name.toLowerCase()
-    if (name.endsWith('.json') && !files.value.jsonFile) {
+    if (name.endsWith('.json')) {
       files.value.jsonFile = file
-    } else if ((name.endsWith('.atlas') || name.endsWith('.txt')) && !files.value.atlasFile) {
+    } else if (name.endsWith('.atlas') || name.endsWith('.txt')) {
       files.value.atlasFile = file
     } else if (name.endsWith('.png') || name.endsWith('.pma') || name.endsWith('.pma.png')) {
-      if (!files.value.pngFiles) files.value.pngFiles = []
       files.value.pngFiles.push(file)
     }
   }
