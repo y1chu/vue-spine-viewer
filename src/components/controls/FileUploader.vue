@@ -2,6 +2,25 @@
   <div class="upload-section">
     <label>{{ t('uploader.title') }}</label>
 
+    <div
+      class="drop-area"
+      :class="{ dragging: isDragging }"
+      @click="triggerFileInput"
+      @dragover.prevent="isDragging = true"
+      @dragleave="isDragging = false"
+      @drop.prevent="handleDrop"
+    >
+      {{ t('uploader.drag_or_click_hint') }}
+    </div>
+    <input
+      ref="fileInputRef"
+      type="file"
+      multiple
+      accept=".json,.atlas,.txt,.png,.pma,.pma.png"
+      style="display: none"
+      @change="handleFileSelect"
+    />
+
     <label for="json-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('uploader.select_json') }}</span>
       <span class="file-name-display">{{ jsonFileName }}</span>
@@ -58,6 +77,9 @@ const files = ref({
   pngFiles: null,
 })
 
+const isDragging = ref(false)
+const fileInputRef = ref(null)
+
 const jsonFileName = computed(() => files.value.jsonFile?.name || '')
 const atlasFileName = computed(() => files.value.atlasFile?.name || '')
 const pngFileName = computed(() => {
@@ -65,6 +87,44 @@ const pngFileName = computed(() => {
   if (files.value.pngFiles.length === 1) return files.value.pngFiles[0].name
   return `${files.value.pngFiles.length} images selected`
 })
+
+const triggerFileInput = () => {
+  fileInputRef.value?.click()
+}
+
+const processFiles = (fileList) => {
+  files.value.jsonFile = null
+  files.value.atlasFile = null
+  files.value.pngFiles = []
+
+  const newFiles = Array.from(fileList)
+
+  for (const file of newFiles) {
+    const name = file.name.toLowerCase()
+    if (name.endsWith('.json')) {
+      files.value.jsonFile = file
+    } else if (name.endsWith('.atlas') || name.endsWith('.txt')) {
+      files.value.atlasFile = file
+    } else if (name.endsWith('.png') || name.endsWith('.pma') || name.endsWith('.pma.png')) {
+      files.value.pngFiles.push(file)
+    }
+  }
+}
+
+const handleFileSelect = (event) => {
+  const selectedFiles = event.target.files
+  if (selectedFiles?.length) {
+    processFiles(selectedFiles)
+  }
+}
+
+const handleDrop = (event) => {
+  isDragging.value = false
+  const droppedFiles = event.dataTransfer.files
+  if (droppedFiles?.length) {
+    processFiles(droppedFiles)
+  }
+}
 
 const handleFileChange = (event, type) => {
   const fileList = event.target.files
@@ -94,19 +154,36 @@ const loadAnimation = () => {
   gap: 15px;
 
   & > label {
-    font-weight: 600;
-    font-size: 1.1em;
     color: var(--color-white);
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+}
+
+.drop-area {
+  background: var(--color-section);
+  border: 2px dashed var(--color-gray-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 20px;
+  text-align: center;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+
+  &.dragging {
+    background: var(--color-gray-dark);
+    border-color: var(--color-red);
   }
 }
 
 .file-label {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 10px;
   background: var(--color-section);
   border: 2px dashed var(--color-gray-dark);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
 
   &:hover {
     background: var(--color-gray-dark);
@@ -120,15 +197,15 @@ const loadAnimation = () => {
 }
 
 .file-name-display {
-  font-size: 0.8em;
   color: var(--color-red-light);
-  margin-top: 5px;
+  font-size: 0.8em;
   font-weight: 400;
-  pointer-events: none;
   height: 1.2em;
+  margin-top: 5px;
+  max-width: 100%;
   overflow: hidden;
+  pointer-events: none;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
 }
 </style>

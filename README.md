@@ -7,6 +7,7 @@ A web-based viewer for [Spine](http://esotericsoftware.com/) animations, built w
 
 ## Features
 -   **Load Custom Animations**: Upload your `.json`, `.atlas`, and `.png` files to view your Spine animations.
+-   **Drag and Drop Support**: Drop all required files onto the uploader in one action.
 -   **Runtime Version Switching**: Easily switch between different Spine runtime versions (e.g., 4.1, 4.2) and reload the application.
 -   **Multi-Track Animations**: Play multiple animations simultaneously on different tracks.
 -   **Playback Control**: Pause, play, and adjust the animation speed (timescale).
@@ -48,9 +49,10 @@ Lints the source code using ESLint.
                                                                                     
 ## How to Use the Viewer
 1.  (Optional) Select your desired Spine runtime version from the dropdown and click "Reload with Version".
-2.  Use the "Upload Animation Files" section to select your Spine `.json`, `.atlas`, and ixmage (`.png`) files.
-3.  Click the "Load Animation" button.
-4.  Once loaded, use the controls on the side panel to interact with your animation (change skins, play different animations, adjust speed, etc.).
+2.  Use the "Upload Animation Files" section to select your Spine `.json`, `.atlas`, and image (`.png`) files, or simply drag them all onto the uploader.
+3.  If you upload another set of files, the previous selection will be replaced.
+4.  Click the "Load Animation" button.
+5.  Once loaded, use the controls on the side panel to interact with your animation (change skins, play different animations, adjust speed, etc.).
 
 ## Contributing
 

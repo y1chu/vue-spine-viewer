@@ -10,6 +10,7 @@
     "select_json": "1. Select .JSON File",
     "select_atlas": "2. Select .ATLAS File",
     "select_png": "3. Select .PNG Image(s)",
+    "drag_or_click_hint": "Select or drag all files here",
     "load": "Load Animation",
     "missing_files": "Please select all required files (.json, .atlas, and at least one .png)."
   },
