@@ -5,12 +5,21 @@
     <div
       class="drop-area"
       :class="{ dragging: isDragging }"
+      @click="triggerFileInput"
       @dragover.prevent="isDragging = true"
       @dragleave="isDragging = false"
       @drop.prevent="handleDrop"
     >
-      {{ t('uploader.drag_hint') }}
+      {{ t('uploader.drag_or_click_hint') }}
     </div>
+    <input
+      ref="fileInputRef"
+      type="file"
+      multiple
+      accept=".json,.atlas,.txt,.png,.pma,.pma.png"
+      style="display: none"
+      @change="handleFileSelect"
+    />
 
     <label for="json-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('uploader.select_json') }}</span>
@@ -69,6 +78,7 @@ const files = ref({
 })
 
 const isDragging = ref(false)
+const fileInputRef = ref(null)
 
 const jsonFileName = computed(() => files.value.jsonFile?.name || '')
 const atlasFileName = computed(() => files.value.atlasFile?.name || '')
@@ -78,26 +88,18 @@ const pngFileName = computed(() => {
   return `${files.value.pngFiles.length} images selected`
 })
 
-const handleFileChange = (event, type) => {
-  const fileList = event.target.files
-  if (!fileList || fileList.length === 0) return
-
-  if (type === 'json') files.value.jsonFile = fileList[0]
-  if (type === 'atlas') files.value.atlasFile = fileList[0]
-  if (type === 'png') files.value.pngFiles = Array.from(fileList)
+const triggerFileInput = () => {
+  fileInputRef.value?.click()
 }
 
-const handleDrop = (event) => {
-  isDragging.value = false
-  const dropped = Array.from(event.dataTransfer.files)
-  if (!dropped.length) return
-
-  // Replace previously selected files when dropping again
+const processFiles = (fileList) => {
   files.value.jsonFile = null
   files.value.atlasFile = null
   files.value.pngFiles = []
 
-  for (const file of dropped) {
+  const newFiles = Array.from(fileList)
+
+  for (const file of newFiles) {
     const name = file.name.toLowerCase()
     if (name.endsWith('.json')) {
       files.value.jsonFile = file
@@ -107,6 +109,30 @@ const handleDrop = (event) => {
       files.value.pngFiles.push(file)
     }
   }
+}
+
+const handleFileSelect = (event) => {
+  const selectedFiles = event.target.files
+  if (selectedFiles?.length) {
+    processFiles(selectedFiles)
+  }
+}
+
+const handleDrop = (event) => {
+  isDragging.value = false
+  const droppedFiles = event.dataTransfer.files
+  if (droppedFiles?.length) {
+    processFiles(droppedFiles)
+  }
+}
+
+const handleFileChange = (event, type) => {
+  const fileList = event.target.files
+  if (!fileList || fileList.length === 0) return
+
+  if (type === 'json') files.value.jsonFile = fileList[0]
+  if (type === 'atlas') files.value.atlasFile = fileList[0]
+  if (type === 'png') files.value.pngFiles = Array.from(fileList)
 }
 
 const loadAnimation = () => {
@@ -128,19 +154,36 @@ const loadAnimation = () => {
   gap: 15px;
 
   & > label {
-    font-weight: 600;
-    font-size: 1.1em;
     color: var(--color-white);
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+}
+
+.drop-area {
+  background: var(--color-section);
+  border: 2px dashed var(--color-gray-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 20px;
+  text-align: center;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+
+  &.dragging {
+    background: var(--color-gray-dark);
+    border-color: var(--color-red);
   }
 }
 
 .file-label {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 10px;
   background: var(--color-section);
   border: 2px dashed var(--color-gray-dark);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
 
   &:hover {
     background: var(--color-gray-dark);
@@ -154,32 +197,15 @@ const loadAnimation = () => {
 }
 
 .file-name-display {
-  font-size: 0.8em;
   color: var(--color-red-light);
-  margin-top: 5px;
+  font-size: 0.8em;
   font-weight: 400;
-  pointer-events: none;
   height: 1.2em;
+  margin-top: 5px;
+  max-width: 100%;
   overflow: hidden;
+  pointer-events: none;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
-}
-
-.drop-area {
-  padding: 20px;
-  text-align: center;
-  border: 2px dashed var(--color-gray-dark);
-  background: var(--color-section);
-  border-radius: 8px;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-  cursor: pointer;
-}
-
-.drop-area.dragging {
-  background: var(--color-gray-dark);
-  border-color: var(--color-red);
 }
 </style>
