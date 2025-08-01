@@ -21,8 +21,8 @@
     </div>
 
     <div class="popup-button-container">
-      <button @click="applyTracks" class="control-button apply-button">
-        {{ t('modal.apply') }}
+      <button @click="clearTracks" class="control-button clear-button">
+        {{ t('modal.clear_all') }}
       </button>
       <button @click="$emit('close')" class="control-button close-button">
         {{ t('modal.close') }}
@@ -32,11 +32,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { phaserStore } from '@/store/phaserStore.js'
 import { useDraggable } from '@/composables/useDraggable.js'
-const emit = defineEmits(['close'])
+defineEmits(['close'])
 
 const { t } = useI18n()
 
@@ -64,8 +64,13 @@ const applyTracks = () => {
     }
   }
   phaserStore.spineObject.scene.fitAndCenterSpineObject(phaserStore.spineObject)
-  emit('close')
 }
+
+const clearTracks = () => {
+  trackSelections.value = Array(maxTracks).fill('')
+}
+
+watch(trackSelections, applyTracks, { deep: true })
 </script>
 
 <style lang="postcss" scoped>

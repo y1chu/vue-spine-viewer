@@ -85,13 +85,13 @@ body {
   color: var(--color-black);
 }
 
-.control-button.apply-button {
-  background: linear-gradient(145deg, var(--color-green-light), var(--color-green));
-  color: var(--color-black);
-}
-
 .control-button.close-button {
   background: linear-gradient(145deg, var(--color-red-light), var(--color-red));
+  color: var(--color-white);
+}
+
+.control-button.clear-button {
+  background: linear-gradient(145deg, var(--color-gray), var(--color-gray-dark));
   color: var(--color-white);
 }
 

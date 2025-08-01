@@ -17,8 +17,8 @@
     </div>
 
     <div class="popup-button-container">
-      <button @click="applySkins" class="control-button apply-button">
-        {{ t('modal.apply') }}
+      <button @click="clearSkins" class="control-button clear-button">
+        {{ t('modal.clear_all') }}
       </button>
       <button @click="$emit('close')" class="control-button close-button">
         {{ t('modal.close') }}
@@ -28,12 +28,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { phaserStore } from '@/store/phaserStore.js'
 import { useDraggable } from '@/composables/useDraggable.js'
 const { t } = useI18n()
-const emit = defineEmits(['close'])
+defineEmits(['close'])
 
 const popupRef = ref(null)
 const handleRef = ref(null)
@@ -63,8 +63,13 @@ const applySkins = () => {
   }
   skeleton.setSlotsToSetupPose()
   phaserStore.spineObject.scene.fitAndCenterSpineObject(phaserStore.spineObject)
-  emit('close')
 }
+
+const clearSkins = () => {
+  selectedSkins.value = []
+}
+
+watch(selectedSkins, applySkins, { deep: true })
 </script>
 
 <style lang="postcss" scoped>
