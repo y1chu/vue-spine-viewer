@@ -21,6 +21,9 @@
     </div>
 
     <div class="popup-button-container">
+      <button @click="clearTracks" class="control-button clear-button">
+        {{ t('modal.clear_all') }}
+      </button>
       <button @click="$emit('close')" class="control-button close-button">
         {{ t('modal.close') }}
       </button>
@@ -61,6 +64,10 @@ const applyTracks = () => {
     }
   }
   phaserStore.spineObject.scene.fitAndCenterSpineObject(phaserStore.spineObject)
+}
+
+const clearTracks = () => {
+  trackSelections.value = Array(maxTracks).fill('')
 }
 
 watch(trackSelections, applyTracks, { deep: true })

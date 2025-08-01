@@ -17,6 +17,9 @@
     </div>
 
     <div class="popup-button-container">
+      <button @click="clearSkins" class="control-button clear-button">
+        {{ t('modal.clear_all') }}
+      </button>
       <button @click="$emit('close')" class="control-button close-button">
         {{ t('modal.close') }}
       </button>
@@ -60,6 +63,10 @@ const applySkins = () => {
   }
   skeleton.setSlotsToSetupPose()
   phaserStore.spineObject.scene.fitAndCenterSpineObject(phaserStore.spineObject)
+}
+
+const clearSkins = () => {
+  selectedSkins.value = []
 }
 
 watch(selectedSkins, applySkins, { deep: true })

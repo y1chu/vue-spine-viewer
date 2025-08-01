@@ -27,7 +27,8 @@
   },
   "modal": {
     "select_skins": "Select Skins",
-    "close": "Close"
+    "close": "Close",
+    "clear_all": "Clear All"
   },
   "playback": {
     "title": "Playback Controls",

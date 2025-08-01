@@ -27,7 +27,8 @@
   },
   "modal": {
     "select_skins": "選擇皮膚",
-    "close": "關閉"
+    "close": "關閉",
+    "clear_all": "清除所有"
   },
   "playback": {
     "title": "播放控制",
