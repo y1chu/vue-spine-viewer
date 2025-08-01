@@ -26,7 +26,7 @@ const { t } = useI18n()
 const params = new URLSearchParams(window.location.search)
 const selectedSpineUrl = ref(
   params.get('spineVer') ||
-    'https://unpkg.com/@esotericsoftware/spine-phaser@4.2.*/dist/iife/spine-phaser.js',
+    'https://unpkg.com/@esotericsoftware/spine-phaser@4.1.*/dist/iife/spine-phaser.js',
 )
 
 const reloadWithVersion = () => {

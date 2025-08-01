@@ -8,8 +8,7 @@ const messages = {
 }
 
 const params = new URLSearchParams(window.location.search)
-const browserLang = navigator.language.toLowerCase()
-const defaultLocale = messages[browserLang] ? browserLang : 'en-us'
+const defaultLocale = 'zh-tw'
 const locale = params.get('lang') || defaultLocale
 
 export const i18n = createI18n({
