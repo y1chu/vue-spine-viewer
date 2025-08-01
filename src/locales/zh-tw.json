@@ -10,6 +10,7 @@
     "select_json": "1. 選擇 .JSON 檔案",
     "select_atlas": "2. 選擇 .ATLAS 檔案",
     "select_png": "3. 選擇 .PNG 圖片",
+    "drag_hint": "或將所有檔案拖曳至此",
     "load": "載入動畫",
     "missing_files": "請選擇所有必要的檔案 (.json、.atlas 及至少一個 .png)。"
   },

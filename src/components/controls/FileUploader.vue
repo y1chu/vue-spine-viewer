@@ -2,6 +2,16 @@
   <div class="upload-section">
     <label>{{ t('uploader.title') }}</label>
 
+    <div
+      class="drop-area"
+      :class="{ dragging: isDragging }"
+      @dragover.prevent="isDragging = true"
+      @dragleave="isDragging = false"
+      @drop.prevent="handleDrop"
+    >
+      {{ t('uploader.drag_hint') }}
+    </div>
+
     <label for="json-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('uploader.select_json') }}</span>
       <span class="file-name-display">{{ jsonFileName }}</span>
@@ -58,6 +68,8 @@ const files = ref({
   pngFiles: null,
 })
 
+const isDragging = ref(false)
+
 const jsonFileName = computed(() => files.value.jsonFile?.name || '')
 const atlasFileName = computed(() => files.value.atlasFile?.name || '')
 const pngFileName = computed(() => {
@@ -73,6 +85,24 @@ const handleFileChange = (event, type) => {
   if (type === 'json') files.value.jsonFile = fileList[0]
   if (type === 'atlas') files.value.atlasFile = fileList[0]
   if (type === 'png') files.value.pngFiles = Array.from(fileList)
+}
+
+const handleDrop = (event) => {
+  isDragging.value = false
+  const dropped = Array.from(event.dataTransfer.files)
+  if (!dropped.length) return
+
+  for (const file of dropped) {
+    const name = file.name.toLowerCase()
+    if (name.endsWith('.json') && !files.value.jsonFile) {
+      files.value.jsonFile = file
+    } else if ((name.endsWith('.atlas') || name.endsWith('.txt')) && !files.value.atlasFile) {
+      files.value.atlasFile = file
+    } else if (name.endsWith('.png') || name.endsWith('.pma') || name.endsWith('.pma.png')) {
+      if (!files.value.pngFiles) files.value.pngFiles = []
+      files.value.pngFiles.push(file)
+    }
+  }
 }
 
 const loadAnimation = () => {
@@ -130,5 +160,22 @@ const loadAnimation = () => {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+}
+
+.drop-area {
+  padding: 20px;
+  text-align: center;
+  border: 2px dashed var(--color-gray-dark);
+  background: var(--color-section);
+  border-radius: 8px;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+  cursor: pointer;
+}
+
+.drop-area.dragging {
+  background: var(--color-gray-dark);
+  border-color: var(--color-red);
 }
 </style>
