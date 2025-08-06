@@ -5,60 +5,14 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 import { phaserStore } from '../store/phaserStore.js'
-import { GameScene } from '../phaser/GameScene.js'
+import { initGame, getRuntimeUrl } from '../phaser/initGame.js'
 
 let game
 
-// This function loads the Spine runtime dynamically
-const loadSpineRuntime = (spineVersionUrl) => {
-  return new Promise((resolve, reject) => {
-    const existingScript = document.querySelector(`script[src="${spineVersionUrl}"]`)
-    if (existingScript) {
-      resolve()
-      return
-    }
-
-    const script = document.createElement('script')
-    script.src = spineVersionUrl
-    script.setAttribute('data-spine-phaser', 'true')
-    script.onload = resolve
-    script.onerror = reject
-    document.head.appendChild(script)
-  })
-}
-
-const launchGame = async () => {
-  // Get the selected Spine version from URL or default
-  const params = new URLSearchParams(window.location.search)
-  const spineVersionUrl =
-    params.get('spineVer') ||
-    'https://unpkg.com/@esotericsoftware/spine-phaser@4.1.*/dist/iife/spine-phaser.js'
-
-  try {
-    await loadSpineRuntime(spineVersionUrl)
-
-    const gameConfig = {
-      renderType: Phaser.WEBGL,
-      parent: 'game-container',
-      width: 1280,
-      height: 720,
-      backgroundColor: '#111318',
-      scene: [GameScene],
-      plugins: {
-        scene: [{ key: 'spine', plugin: spine.SpinePlugin, mapping: 'spine' }],
-      },
-    }
-
-    game = new Phaser.Game(gameConfig)
-    phaserStore.setGameInstance(game)
-    // console.error(game)
-  } catch (error) {
-    console.error('Failed to load Spine Phaser runtime.', error)
-  }
-}
-
-onMounted(() => {
-  launchGame()
+onMounted(async () => {
+  // Launch with the Spine 4.1 runtime by default. It will be replaced with
+  // the appropriate version once a Spine JSON file is uploaded and parsed.
+  game = await initGame(getRuntimeUrl('4.1'))
 })
 
 onUnmounted(() => {

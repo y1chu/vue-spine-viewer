@@ -41,12 +41,6 @@
     "title": "縮放調整",
     "reset": "重設縮放"
   },
-  "version": {
-    "title": "Spine 執行時版本",
-    "spine41": "Spine 4.1",
-    "spine42": "Spine 4.2",
-    "reload": "以此版本重新載入"
-  },
   "language": {
     "title": "語言",
     "en": "英文",

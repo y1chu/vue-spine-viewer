@@ -41,12 +41,6 @@
     "title": "Viewer Scale",
     "reset": "Reset Scale"
   },
-  "version": {
-    "title": "Spine Runtime Version",
-    "spine41": "Spine 4.1",
-    "spine42": "Spine 4.2",
-    "reload": "Reload with Version"
-  },
   "language": {
     "title": "Language",
     "en": "English",
