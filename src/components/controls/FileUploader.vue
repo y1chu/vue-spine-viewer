@@ -58,16 +58,22 @@
       style="display: none"
     />
 
-    <button @click="loadAnimation" class="control-button load-button">
-      {{ t('uploader.load') }}
-    </button>
-  </div>
-</template>
+      <button @click="loadAnimation" class="control-button load-button">
+        {{ t('uploader.load') }}
+      </button>
+
+      <div class="version-indicator">
+        <p>{{ t('uploader.skeleton_version', { version: skeletonVersion || '-' }) }}</p>
+        <p>{{ t('uploader.runtime_version', { version: runtimeVersion }) }}</p>
+      </div>
+    </div>
+  </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { initGame, getRuntimeUrl, detectSpineVersion } from '@/phaser/initGame.js'
+import { initGame, detectSpineVersion } from '@/phaser/initGame.js'
+import { phaserStore } from '@/store/phaserStore.js'
 
 const { t } = useI18n()
 
@@ -87,6 +93,9 @@ const pngFileName = computed(() => {
   if (files.value.pngFiles.length === 1) return files.value.pngFiles[0].name
   return `${files.value.pngFiles.length} images selected`
 })
+
+const runtimeVersion = computed(() => phaserStore.runtimeVersion)
+const skeletonVersion = computed(() => phaserStore.skeletonVersion)
 
 const triggerFileInput = () => {
   fileInputRef.value?.click()
@@ -135,19 +144,20 @@ const handleFileChange = (event, type) => {
   if (type === 'png') files.value.pngFiles = Array.from(fileList)
 }
 
-const loadAnimation = async () => {
-  if (!files.value.jsonFile || !files.value.atlasFile || !files.value.pngFiles?.length) {
-    alert(t('uploader.missing_files'))
-    return
-  }
+  const loadAnimation = async () => {
+    if (!files.value.jsonFile || !files.value.atlasFile || !files.value.pngFiles?.length) {
+      alert(t('uploader.missing_files'))
+      return
+    }
 
-  // Determine required Spine runtime version from JSON file and ensure the
-  // corresponding plugin and Phaser game are loaded.
-  const version = await detectSpineVersion(files.value.jsonFile)
-  const game = await initGame(getRuntimeUrl(version))
-  const gameScene = game.scene.getScene('GameScene')
-  gameScene.loadAndDisplaySpine(files.value)
-}
+    // Determine required Spine runtime version from JSON file and ensure the
+    // corresponding plugin and Phaser game are loaded.
+    const version = await detectSpineVersion(files.value.jsonFile)
+    const game = await initGame(version)
+    phaserStore.setSkeletonVersion(version)
+    const gameScene = game.scene.getScene('GameScene')
+    gameScene.loadAndDisplaySpine(files.value)
+  }
 </script>
 
 <style lang="postcss" scoped>
@@ -210,5 +220,12 @@ const loadAnimation = async () => {
   pointer-events: none;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.version-indicator {
+  color: var(--color-gray-light);
+  font-size: 0.85em;
+  line-height: 1.4;
+  text-align: center;
 }
 </style>

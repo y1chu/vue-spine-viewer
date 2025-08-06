@@ -5,15 +5,15 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 import { phaserStore } from '../store/phaserStore.js'
-import { initGame, getRuntimeUrl } from '../phaser/initGame.js'
+import { initGame } from '../phaser/initGame.js'
 
 let game
 
-onMounted(async () => {
-  // Launch with the Spine 4.1 runtime by default. It will be replaced with
-  // the appropriate version once a Spine JSON file is uploaded and parsed.
-  game = await initGame(getRuntimeUrl('4.1'))
-})
+  onMounted(async () => {
+    // Launch with the Spine 4.1 runtime by default. It will be replaced with
+    // the appropriate version once a Spine JSON file is uploaded and parsed.
+    game = await initGame('4.1')
+  })
 
 onUnmounted(() => {
   game?.destroy(true)

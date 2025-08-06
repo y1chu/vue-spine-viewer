@@ -21,6 +21,10 @@ const loadSpineRuntime = (url) =>
       existing.remove()
     }
 
+    // Ensure the global spine object is cleared so the newly loaded runtime
+    // replaces the previous version completely.
+    delete window.spine
+
     const script = document.createElement('script')
     script.src = url
     script.setAttribute('data-spine-phaser', 'true')
@@ -29,7 +33,7 @@ const loadSpineRuntime = (url) =>
     document.head.appendChild(script)
   })
 
-export const initGame = async (runtimeUrl) => {
+export const initGame = async (runtimeVersion) => {
   if (phaserStore.gameInstance) {
     phaserStore.gameInstance.destroy(true)
     phaserStore.setGameInstance(null)
@@ -37,7 +41,7 @@ export const initGame = async (runtimeUrl) => {
 
   phaserStore.cleanup()
 
-  await loadSpineRuntime(runtimeUrl)
+  await loadSpineRuntime(getRuntimeUrl(runtimeVersion))
 
   return await new Promise((resolve) => {
     const config = {
@@ -55,6 +59,7 @@ export const initGame = async (runtimeUrl) => {
     const game = new Phaser.Game(config)
     game.events.once(Phaser.Core.Events.READY, () => {
       phaserStore.setGameInstance(game)
+      phaserStore.setRuntimeVersion(runtimeVersion)
       resolve(game)
     })
   })

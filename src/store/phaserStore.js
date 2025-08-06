@@ -7,6 +7,8 @@ export const phaserStore = reactive({
   animations: [],
   isAnimationLoaded: false,
   scaleFactor: 0.9,
+  runtimeVersion: '4.1',
+  skeletonVersion: null,
 
   setGameInstance(game) {
     this.gameInstance = game
@@ -27,6 +29,14 @@ export const phaserStore = reactive({
 
   setScaleFactor(factor) {
     this.scaleFactor = factor
+  },
+
+  setRuntimeVersion(version) {
+    this.runtimeVersion = version
+  },
+
+  setSkeletonVersion(version) {
+    this.skeletonVersion = version
   },
 
   cleanup() {

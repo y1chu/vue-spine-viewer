@@ -5,15 +5,17 @@
     "upload_image": "上傳背景圖片",
     "clear_image": "清除圖片"
   },
-  "uploader": {
-    "title": "上傳動畫檔案",
-    "select_json": "1. 選擇 .JSON 檔案",
-    "select_atlas": "2. 選擇 .ATLAS 檔案",
-    "select_png": "3. 選擇 .PNG 圖片",
-    "drag_or_click_hint": "選擇或將所有檔案拖曳至此",
-    "load": "載入動畫",
-    "missing_files": "請選擇所有必要的檔案 (.json、.atlas 及至少一個 .png)。"
-  },
+    "uploader": {
+      "title": "上傳動畫檔案",
+      "select_json": "1. 選擇 .JSON 檔案",
+      "select_atlas": "2. 選擇 .ATLAS 檔案",
+      "select_png": "3. 選擇 .PNG 圖片",
+      "drag_or_click_hint": "選擇或將所有檔案拖曳至此",
+      "load": "載入動畫",
+      "missing_files": "請選擇所有必要的檔案 (.json、.atlas 及至少一個 .png)。",
+      "skeleton_version": "Spine JSON 版本：{version}",
+      "runtime_version": "執行時版本：{version}"
+    },
   "multiskin": {
     "title": "多皮膚選擇",
     "open": "開啟皮膚選擇器"
