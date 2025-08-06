@@ -22,8 +22,10 @@ const loadSpineRuntime = (url) =>
     }
 
     // Ensure the global spine object is cleared so the newly loaded runtime
-    // replaces the previous version completely.
-    delete window.spine
+    // replaces the previous version completely. The property created by the
+    // runtime isn't configurable, so we can't delete it; set it to undefined
+    // instead so the next script can override it.
+    if ('spine' in window) window.spine = undefined
 
     const script = document.createElement('script')
     script.src = url
