@@ -67,7 +67,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { phaserStore } from '@/store/phaserStore.js'
 import { initGame, getRuntimeUrl, detectSpineVersion } from '@/phaser/initGame.js'
 
 const { t } = useI18n()
@@ -145,12 +144,9 @@ const loadAnimation = async () => {
   // Determine required Spine runtime version from JSON file and ensure the
   // corresponding plugin and Phaser game are loaded.
   const version = await detectSpineVersion(files.value.jsonFile)
-  await initGame(getRuntimeUrl(version))
-
-  const gameScene = phaserStore.gameInstance?.scene.getScene('GameScene')
-  if (gameScene) {
-    gameScene.loadAndDisplaySpine(files.value)
-  }
+  const game = await initGame(getRuntimeUrl(version))
+  const gameScene = game.scene.getScene('GameScene')
+  gameScene.loadAndDisplaySpine(files.value)
 }
 </script>
 

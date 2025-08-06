@@ -39,21 +39,25 @@ export const initGame = async (runtimeUrl) => {
 
   await loadSpineRuntime(runtimeUrl)
 
-  const config = {
-    renderType: Phaser.WEBGL,
-    parent: 'game-container',
-    width: 1280,
-    height: 720,
-    backgroundColor: '#111318',
-    scene: [GameScene],
-    plugins: {
-      scene: [{ key: 'spine', plugin: spine.SpinePlugin, mapping: 'spine' }],
-    },
-  }
+  return await new Promise((resolve) => {
+    const config = {
+      renderType: Phaser.WEBGL,
+      parent: 'game-container',
+      width: 1280,
+      height: 720,
+      backgroundColor: '#111318',
+      scene: [GameScene],
+      plugins: {
+        scene: [{ key: 'spine', plugin: spine.SpinePlugin, mapping: 'spine' }],
+      },
+    }
 
-  const game = new Phaser.Game(config)
-  phaserStore.setGameInstance(game)
-  return game
+    const game = new Phaser.Game(config)
+    game.events.once(Phaser.Core.Events.READY, () => {
+      phaserStore.setGameInstance(game)
+      resolve(game)
+    })
+  })
 }
 
 export const detectSpineVersion = async (jsonFile) => {
