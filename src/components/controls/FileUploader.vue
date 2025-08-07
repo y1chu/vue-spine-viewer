@@ -150,13 +150,13 @@ const handleFileChange = (event, type) => {
       return
     }
 
-    // Determine required Spine runtime version from JSON file and ensure the
-    // corresponding plugin and Phaser game are loaded.
-    const version = await detectSpineVersion(files.value.jsonFile)
-    const game = await initGame(version)
-    phaserStore.setSkeletonVersion(version)
+    // Read the Spine JSON to determine both the skeleton version and which
+    // runtime to load, then initialize Phaser with the correct plugin.
+    const { skeletonVer, runtimeVer } = await detectSpineVersion(files.value.jsonFile)
+    const game = await initGame(runtimeVer)
+    phaserStore.setSkeletonVersion(skeletonVer)
     const gameScene = game.scene.getScene('GameScene')
-    gameScene.loadAndDisplaySpine(files.value)
+    gameScene?.loadAndDisplaySpine(files.value)
   }
 </script>
 

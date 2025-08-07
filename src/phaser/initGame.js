@@ -35,72 +35,57 @@ const loadSpineRuntime = (url) =>
     document.head.appendChild(script)
   })
 
-// Initialize the Phaser game or swap out the Spine runtime without a full reload.
+// Initialize the Phaser game. If a game already exists and the runtime matches
+// the requested version, the existing instance is returned. Otherwise the
+// previous game is destroyed and a new one is created using the required
+// Spine runtime.
 export const initGame = async (runtimeVersion) => {
-  // First run: create the game with the requested runtime.
-  if (!phaserStore.gameInstance) {
-    await loadSpineRuntime(getRuntimeUrl(runtimeVersion))
+  if (phaserStore.gameInstance && phaserStore.runtimeVersion === runtimeVersion)
+    return phaserStore.gameInstance
 
-    return await new Promise((resolve) => {
-      const config = {
-        renderType: Phaser.WEBGL,
-        parent: 'game-container',
-        width: 1280,
-        height: 720,
-        backgroundColor: '#111318',
-        scene: [GameScene],
-        plugins: {
-          scene: [{ key: 'spine', plugin: spine.SpinePlugin, mapping: 'spine' }],
-        },
-      }
-
-      const game = new Phaser.Game(config)
-      game.events.once(Phaser.Core.Events.READY, () => {
-        phaserStore.setGameInstance(game)
-        phaserStore.setRuntimeVersion(runtimeVersion)
-        resolve(game)
-      })
-    })
+  // Destroy any existing game before swapping runtimes.
+  if (phaserStore.gameInstance) {
+    phaserStore.gameInstance.destroy(true)
+    phaserStore.setGameInstance(null)
+    phaserStore.cleanup()
   }
 
-  const game = phaserStore.gameInstance
-
-  // Runtime already matches; nothing to do.
-  if (phaserStore.runtimeVersion === runtimeVersion) return game
-
-  // Swap to a different Spine runtime.
   await loadSpineRuntime(getRuntimeUrl(runtimeVersion))
 
-  // Remove previous plugin and scene so the new runtime can be installed.
-  phaserStore.cleanup()
-  game.plugins.removeScenePlugin('spine')
-
-  if (game.scene.getScene('GameScene')) {
-    game.scene.stop('GameScene')
-    game.scene.remove('GameScene')
-  }
-
-  // Install the new plugin and recreate the scene.
-  game.plugins.installScenePlugin('spine', spine.SpinePlugin, 'spine')
-  const newScene = game.scene.add('GameScene', GameScene, true)
-
   return await new Promise((resolve) => {
-    newScene.events.once(Phaser.Scenes.Events.CREATE, () => {
+    const config = {
+      renderType: Phaser.WEBGL,
+      parent: 'game-container',
+      width: 1280,
+      height: 720,
+      backgroundColor: '#111318',
+      scene: [GameScene],
+      plugins: {
+        scene: [{ key: 'spine', plugin: spine.SpinePlugin, mapping: 'spine' }],
+      },
+    }
+
+    const game = new Phaser.Game(config)
+    game.events.once(Phaser.Core.Events.READY, () => {
+      phaserStore.setGameInstance(game)
       phaserStore.setRuntimeVersion(runtimeVersion)
       resolve(game)
     })
   })
 }
 
+// Parse a Spine JSON file and return both the skeleton version string reported
+// within the file and the major runtime version to load (4.1 vs 4.2).
 export const detectSpineVersion = async (jsonFile) => {
   try {
     const text = await jsonFile.text()
     const data = JSON.parse(text)
-    const ver = data?.skeleton?.spine || ''
-    if (ver.startsWith('4.2')) return '4.2'
+    const skeletonVer = data?.skeleton?.spine || null
+    const runtimeVer = skeletonVer?.startsWith('4.2') ? '4.2' : '4.1'
+    return { skeletonVer, runtimeVer }
   } catch (e) {
     console.warn('Unable to detect Spine version, defaulting to 4.1', e)
+    return { skeletonVer: null, runtimeVer: '4.1' }
   }
-  return '4.1'
 }
 
