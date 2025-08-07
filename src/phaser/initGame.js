@@ -21,10 +21,11 @@ const loadSpineRuntime = (url) =>
       existing.remove()
     }
 
-    // Ensure the global spine object is cleared so the newly loaded runtime
-    // replaces the previous version completely. The property created by the
-    // runtime isn't configurable, so we can't delete it; set it to undefined
-    // instead so the next script can override it.
+    // Ensure any previously loaded runtime is fully cleared so a new script
+    // can provide its own plugin and global references. The properties created
+    // by the runtime aren't configurable, so set them to undefined instead of
+    // deleting them.
+    if ('SpinePlugin' in window) window.SpinePlugin = undefined
     if ('spine' in window) window.spine = undefined
 
     const script = document.createElement('script')
