@@ -35,32 +35,57 @@ const loadSpineRuntime = (url) =>
     document.head.appendChild(script)
   })
 
+// Initialize the Phaser game or swap out the Spine runtime without a full reload.
 export const initGame = async (runtimeVersion) => {
-  if (phaserStore.gameInstance) {
-    phaserStore.gameInstance.destroy(true)
-    phaserStore.setGameInstance(null)
+  // First run: create the game with the requested runtime.
+  if (!phaserStore.gameInstance) {
+    await loadSpineRuntime(getRuntimeUrl(runtimeVersion))
+
+    return await new Promise((resolve) => {
+      const config = {
+        renderType: Phaser.WEBGL,
+        parent: 'game-container',
+        width: 1280,
+        height: 720,
+        backgroundColor: '#111318',
+        scene: [GameScene],
+        plugins: {
+          scene: [{ key: 'spine', plugin: spine.SpinePlugin, mapping: 'spine' }],
+        },
+      }
+
+      const game = new Phaser.Game(config)
+      game.events.once(Phaser.Core.Events.READY, () => {
+        phaserStore.setGameInstance(game)
+        phaserStore.setRuntimeVersion(runtimeVersion)
+        resolve(game)
+      })
+    })
   }
 
-  phaserStore.cleanup()
+  const game = phaserStore.gameInstance
 
+  // Runtime already matches; nothing to do.
+  if (phaserStore.runtimeVersion === runtimeVersion) return game
+
+  // Swap to a different Spine runtime.
   await loadSpineRuntime(getRuntimeUrl(runtimeVersion))
 
-  return await new Promise((resolve) => {
-    const config = {
-      renderType: Phaser.WEBGL,
-      parent: 'game-container',
-      width: 1280,
-      height: 720,
-      backgroundColor: '#111318',
-      scene: [GameScene],
-      plugins: {
-        scene: [{ key: 'spine', plugin: spine.SpinePlugin, mapping: 'spine' }],
-      },
-    }
+  // Remove previous plugin and scene so the new runtime can be installed.
+  phaserStore.cleanup()
+  game.plugins.removeScenePlugin('spine')
 
-    const game = new Phaser.Game(config)
-    game.events.once(Phaser.Core.Events.READY, () => {
-      phaserStore.setGameInstance(game)
+  if (game.scene.getScene('GameScene')) {
+    game.scene.stop('GameScene')
+    game.scene.remove('GameScene')
+  }
+
+  // Install the new plugin and recreate the scene.
+  game.plugins.installScenePlugin('spine', spine.SpinePlugin, 'spine')
+  const newScene = game.scene.add('GameScene', GameScene, true)
+
+  return await new Promise((resolve) => {
+    newScene.events.once(Phaser.Scenes.Events.CREATE, () => {
       phaserStore.setRuntimeVersion(runtimeVersion)
       resolve(game)
     })
