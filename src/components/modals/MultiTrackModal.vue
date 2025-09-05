@@ -63,7 +63,6 @@ const applyTracks = () => {
       animationState.setEmptyAnimation(i, 0.1)
     }
   }
-  phaserStore.spineObject.scene.fitAndCenterSpineObject(phaserStore.spineObject)
 }
 
 const clearTracks = () => {
@@ -74,7 +73,6 @@ watch(trackSelections, applyTracks, { deep: true })
 </script>
 
 <style lang="postcss" scoped>
-/* Base popup styles are in main.css. These are specific to the track modal. */
 .track-controls-container {
   display: flex;
   flex-direction: column;
