@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { phaserStore } from '../store/phaserStore.js'
 import { GameScene } from '../phaser/GameScene.js'
 
@@ -22,19 +22,45 @@ const loadSpineRuntime = (spineVersionUrl) => {
     script.src = spineVersionUrl
     script.setAttribute('data-spine-phaser', 'true')
     script.onload = resolve
-    script.onerror = reject
+    script.onerror = () => reject(new Error(`Failed to load runtime script: ${spineVersionUrl}`))
     document.head.appendChild(script)
   })
 }
 
-const launchGame = async () => {
-  // Get the selected Spine version from URL or default
-  const params = new URLSearchParams(window.location.search)
-  const spineVersionUrl =
-    params.get('spineVer') ||
-    'https://unpkg.com/@esotericsoftware/spine-phaser@4.1.*/dist/iife/spine-phaser.js'
+const removeExistingSpineScripts = () => {
+  // Remove any script we added and any prior spine-phaser scripts found in DOM, just in case
+  const added = Array.from(document.querySelectorAll('script[data-spine-phaser="true"]'))
+  const anySpine = Array.from(
+    document.querySelectorAll('script[src*="@esotericsoftware/spine-phaser"]'),
+  )
+  ;[...new Set([...added, ...anySpine])].forEach((s) => s.parentElement?.removeChild(s))
 
+  // Clear global to avoid leftover symbols across versions
   try {
+    if (window && window.spine) delete window.spine
+  } catch (_) {}
+}
+
+// Build unpkg URL from a version string.
+// - For 4.1: use wildcard '4.1.*' to match available runtime builds.
+// - For 4.2: use exact version (no wildcard), as provided in JSON.
+const buildUnpkgUrlFromVersion = (ver) => {
+  if (!ver) return null
+  const raw = String(ver).trim()
+  const m = raw.match(/^(\d+)\.(\d+)(?:\.(\d+))?/)
+  if (!m) return null
+  const major = m[1]
+  const minor = m[2]
+  const captured = m[0] // numeric part only (e.g., 4.2 or 4.2.43)
+  const is41 = major === '4' && minor === '1'
+  const versionForCdn = is41 ? `${major}.${minor}.*` : captured
+  return `https://unpkg.com/@esotericsoftware/spine-phaser@${versionForCdn}/dist/iife/spine-phaser.js`
+}
+
+const launchGameWithUrl = async (spineVersionUrl) => {
+  try {
+    // Ensure we only have the targeted runtime script
+    removeExistingSpineScripts()
     await loadSpineRuntime(spineVersionUrl)
 
     const gameConfig = {
@@ -54,11 +80,40 @@ const launchGame = async () => {
     // console.error(game)
   } catch (error) {
     console.error('Failed to load Spine Phaser runtime.', error)
+    alert(`Could not load Spine Phaser runtime.\n${error?.message || error}`)
   }
 }
 
 onMounted(() => {
-  launchGame()
+  // Initialize from URL param if present; otherwise wait for auto-detect
+  const params = new URLSearchParams(window.location.search)
+  const qp = params.get('spineVer')
+  let initialUrl = null
+  if (qp) {
+    // Accept either a full URL or a plain version; use exact version if provided
+    if (/^https?:\/\//i.test(qp)) {
+      initialUrl = qp
+    } else {
+      initialUrl = buildUnpkgUrlFromVersion(qp)
+    }
+  }
+  if (initialUrl && initialUrl !== phaserStore.spineRuntimeUrl) {
+    phaserStore.setSpineRuntimeUrl(initialUrl)
+    launchGameWithUrl(initialUrl)
+  }
+
+  // React to runtime changes (e.g., auto-detected from JSON upload)
+  watch(
+    () => phaserStore.spineRuntimeUrl,
+    (newUrl, oldUrl) => {
+      if (!newUrl || newUrl === oldUrl) return
+      // Destroy existing game and relaunch with the requested runtime
+      game?.destroy(true)
+      phaserStore.setGameInstance(null)
+      phaserStore.cleanup()
+      launchGameWithUrl(newUrl)
+    },
+  )
 })
 
 onUnmounted(() => {

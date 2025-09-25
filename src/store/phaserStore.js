@@ -7,6 +7,9 @@ export const phaserStore = reactive({
   animations: [],
   isAnimationLoaded: false,
   scaleFactor: 0.9,
+  // Spine runtime management (no hard-coded default)
+  spineRuntimeUrl: null,
+  detectedSpineVersion: null,
 
   setGameInstance(game) {
     this.gameInstance = game
@@ -27,6 +30,14 @@ export const phaserStore = reactive({
 
   setScaleFactor(factor) {
     this.scaleFactor = factor
+  },
+
+  setSpineRuntimeUrl(url) {
+    this.spineRuntimeUrl = url
+  },
+
+  setDetectedSpineVersion(ver) {
+    this.detectedSpineVersion = ver
   },
 
   cleanup() {

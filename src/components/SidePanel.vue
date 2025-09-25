@@ -1,7 +1,6 @@
 <template>
   <div class="side-panel">
     <LanguageSelector />
-    <VersionSelector />
     <FileUploader />
     <BackgroundControls />
     <MultiSkinSelector />
@@ -13,7 +12,6 @@
 </template>
 
 <script setup>
-import VersionSelector from './controls/VersionSelector.vue'
 import FileUploader from './controls/FileUploader.vue'
 import BackgroundControls from './controls/BackgroundControls.vue'
 import PlaybackControls from './controls/PlaybackControls.vue'
