@@ -7,7 +7,6 @@ export const phaserStore = reactive({
   animations: [],
   isAnimationLoaded: false,
   scaleFactor: 0.9,
-  // Spine runtime management (no hard-coded default)
   spineRuntimeUrl: null,
   detectedSpineVersion: null,
 

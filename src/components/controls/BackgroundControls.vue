@@ -4,31 +4,17 @@
 
     <div class="control-row">
       <label for="bgColorPicker">{{ t('background.color') }}</label>
-      <input
-        type="color"
-        id="bgColorPicker"
-        v-model="backgroundColor"
-        @input="updateBackgroundColor"
-      />
+      <input type="color" id="bgColorPicker" v-model="backgroundColor" @input="updateBackgroundColor" />
     </div>
 
     <label for="bg-image-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('background.upload_image') }}</span>
       <span class="file-name-display">{{ backgroundImageName }}</span>
     </label>
-    <input
-      id="bg-image-upload"
-      type="file"
-      accept="image/png, image/jpeg"
-      @change="handleBackgroundImageChange"
-      style="display: none"
-    />
+    <input id="bg-image-upload" type="file" accept="image/png, image/jpeg" @change="handleBackgroundImageChange"
+      style="display: none" />
 
-    <button
-      v-if="backgroundImageName"
-      @click="clearBackgroundImage"
-      class="control-button clear-button"
-    >
+    <button v-if="backgroundImageName" @click="clearBackgroundImage" class="control-button clear-button">
       {{ t('background.clear_image') }}
     </button>
   </div>
@@ -46,37 +32,27 @@ const backgroundColor = ref(defaultColor)
 const backgroundImageFile = ref(null)
 const backgroundImageName = ref('')
 
-const getGameScene = () => {
-  return phaserStore.gameInstance?.scene.getScene('GameScene')
-}
+const getGameScene = () => phaserStore.gameInstance?.scene.getScene('GameScene')
 
 const updateBackgroundColor = (event) => {
   const scene = getGameScene()
-  if (scene) {
-    scene.setBackgroundColor(event.target.value)
-  }
+  if (scene) scene.setBackgroundColor(event.target.value)
 }
 
 const handleBackgroundImageChange = (event) => {
   const file = event.target.files[0]
   if (!file) return
-
   backgroundImageFile.value = file
   backgroundImageName.value = file.name
   const scene = getGameScene()
-  if (scene) {
-    scene.setBackgroundImage(file)
-  }
+  if (scene) scene.setBackgroundImage(file)
 }
 
 const clearBackgroundImage = () => {
   backgroundImageFile.value = null
   backgroundImageName.value = ''
   const scene = getGameScene()
-  if (scene) {
-    scene.clearBackgroundImage()
-  }
-  // Reset color to default when image is cleared
+  if (scene) scene.clearBackgroundImage()
   backgroundColor.value = defaultColor
   updateBackgroundColor({ target: { value: defaultColor } })
 }
@@ -88,7 +64,7 @@ const clearBackgroundImage = () => {
   flex-direction: column;
   gap: 15px;
 
-  & > label {
+  >label {
     font-weight: 600;
     font-size: 1.1em;
     color: var(--color-white);
@@ -100,11 +76,11 @@ const clearBackgroundImage = () => {
   justify-content: space-between;
   align-items: center;
 
-  & > label {
+  >label {
     font-weight: 500;
   }
 
-  & > input[type='color'] {
+  >input[type='color'] {
     width: 40px;
     height: 40px;
     border: none;
@@ -115,7 +91,6 @@ const clearBackgroundImage = () => {
   }
 }
 
-/* Reusing styles from FileUploader.vue for consistency */
 .file-label {
   display: flex;
   flex-direction: column;

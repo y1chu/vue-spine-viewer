@@ -6,6 +6,7 @@
       @dragover.prevent="isDragging = true" @dragleave="isDragging = false" @drop.prevent="handleDrop">
       {{ t('uploader.drag_or_click_hint') }}
     </div>
+  
     <input ref="fileInputRef" type="file" multiple accept=".json,.atlas,.txt,.png,.pma,.pma.png" style="display: none"
       @change="handleFileSelect" />
 
@@ -13,21 +14,21 @@
       <span class="file-button-text">{{ t('uploader.select_json') }}</span>
       <span class="file-name-display">{{ jsonFileName }}</span>
     </label>
-    <input id="json-upload" type="file" accept=".json" @change="handleFileChange($event, 'json')"
+    <input id="json-upload" type="file" accept=".json" @change="e => handleFileChange(e, 'json')"
       style="display: none" />
 
     <label for="atlas-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('uploader.select_atlas') }}</span>
       <span class="file-name-display">{{ atlasFileName }}</span>
     </label>
-    <input id="atlas-upload" type="file" accept=".atlas,.txt" @change="handleFileChange($event, 'atlas')"
+    <input id="atlas-upload" type="file" accept=".atlas,.txt" @change="e => handleFileChange(e, 'atlas')"
       style="display: none" />
 
     <label for="png-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('uploader.select_png') }}</span>
       <span class="file-name-display">{{ pngFileName }}</span>
     </label>
-    <input id="png-upload" type="file" accept=".png,.pma,.pma.png" multiple @change="handleFileChange($event, 'png')"
+    <input id="png-upload" type="file" accept=".png,.pma,.pma.png" multiple @change="e => handleFileChange(e, 'png')"
       style="display: none" />
 
     <div class="runtime-detected" v-if="detectedSpineVersion">
@@ -42,27 +43,8 @@
       <button class="control-button" @click="reloadNow">{{ t('uploader.reload_now') }}</button>
     </div>
 
-    <div v-if="postReloadInfo" class="post-reload-tip">
-      <div class="title">{{ t('uploader.after_reload_reselect') }}</div>
-      <ul>
-        <li v-for="name in postReloadInfo.fileNames" :key="name">{{ name }}</li>
-      </ul>
-      <div class="actions">
-        <button class="control-button" :disabled="autoReapplying" @click="autoReapplyFromBundle">
-          {{ autoReapplying ? t('uploader.reapply_loading') : t('uploader.reapply_auto') }}
-        </button>
-        <button class="control-button" @click="copyNames">{{ copyLabel }}</button>
-        <button class="control-button" @click="dismissPostReload">{{ t('uploader.dismiss') }}</button>
-      </div>
-      <div v-if="autoReapplyError" class="error">{{ autoReapplyError }}</div>
-    </div>
-
-    <button
-      @click="loadAnimation"
-      class="control-button load-button"
-      :disabled="Boolean(pendingRuntimeUrl)"
-      :title="pendingRuntimeUrl ? t('uploader.runtime_reload_needed', { ver: pendingRuntimeVersion }) : ''"
-    >
+    <button @click="loadAnimation" class="control-button load-button" :disabled="Boolean(pendingRuntimeUrl)"
+      :title="pendingRuntimeUrl ? t('uploader.runtime_reload_needed', { ver: pendingRuntimeVersion }) : ''">
       {{ t('uploader.load') }}
     </button>
   </div>
@@ -73,48 +55,34 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { phaserStore } from '@/store/phaserStore.js'
 
-// ... (t, files, isDragging, etc. remain the same) ...
-
 const { t } = useI18n()
 
-const files = ref({
-  jsonFile: null,
-  atlasFile: null,
-  pngFiles: null,
-})
-
+const files = ref({ jsonFile: null, atlasFile: null, pngFiles: [] })
 const isDragging = ref(false)
 const fileInputRef = ref(null)
 
 const jsonFileName = computed(() => files.value.jsonFile?.name || '')
 const atlasFileName = computed(() => files.value.atlasFile?.name || '')
 const pngFileName = computed(() => {
-  if (!files.value.pngFiles || files.value.pngFiles.length === 0) return ''
-  if (files.value.pngFiles.length === 1) return files.value.pngFiles[0].name
-  return `${files.value.pngFiles.length} images selected`
+  const list = files.value.pngFiles || []
+  if (!list.length) return ''
+  return list.length === 1 ? list[0].name : `${list.length} files selected`
 })
 
 const detectedSpineVersion = computed(() => phaserStore.detectedSpineVersion)
 
-// Runtime reload helpers
 const pendingRuntimeUrl = ref(null)
 const pendingRuntimeVersion = ref(null)
 const postReloadInfo = ref(null)
-const copyLabel = ref('Copy list')
 const autoReapplying = ref(false)
-const autoReapplyError = ref('')
 
-const triggerFileInput = () => {
-  fileInputRef.value?.click()
-}
+const triggerFileInput = () => fileInputRef.value?.click()
 
 const processFiles = (fileList) => {
   files.value.jsonFile = null
   files.value.atlasFile = null
   files.value.pngFiles = []
-
-  const newFiles = Array.from(fileList)
-
+  const newFiles = Array.from(fileList || [])
   for (const file of newFiles) {
     const name = file.name.toLowerCase()
     if (name.endsWith('.json')) {
@@ -130,34 +98,29 @@ const processFiles = (fileList) => {
 
 const handleFileSelect = (event) => {
   const selectedFiles = event.target.files
-  if (selectedFiles?.length) {
-    processFiles(selectedFiles)
-  }
+  if (selectedFiles?.length) processFiles(selectedFiles)
 }
 
 const handleDrop = (event) => {
   isDragging.value = false
   const droppedFiles = event.dataTransfer.files
-  if (droppedFiles?.length) {
-    processFiles(droppedFiles)
-  }
+  if (droppedFiles?.length) processFiles(droppedFiles)
 }
 
 const handleFileChange = (event, type) => {
   const fileList = event.target.files
-  if (!fileList || fileList.length === 0) return
-
+  if (!fileList || !fileList.length) return
   if (type === 'json') {
     files.value.jsonFile = fileList[0]
     detectRuntimeFromJson(fileList[0])
+  } else if (type === 'atlas') {
+    files.value.atlasFile = fileList[0]
+  } else if (type === 'png') {
+    files.value.pngFiles = Array.from(fileList)
   }
-  if (type === 'atlas') files.value.atlasFile = fileList[0]
-  if (type === 'png') files.value.pngFiles = Array.from(fileList)
 }
 
 const loadAnimation = () => {
-  // Prevent loading when a runtime mismatch has been detected.
-  // Users must reload to switch the Spine runtime version.
   if (pendingRuntimeUrl.value) {
     alert(t('uploader.runtime_reload_needed', { ver: pendingRuntimeVersion.value }))
     return
@@ -167,41 +130,29 @@ const loadAnimation = () => {
     return
   }
   const gameScene = phaserStore.gameInstance?.scene.getScene('GameScene')
-  if (gameScene) {
-    gameScene.loadAndDisplaySpine(files.value)
-  }
+  if (gameScene) gameScene.loadAndDisplaySpine(files.value)
 }
 
 const detectRuntimeFromJson = async (file) => {
   try {
     const text = await file.text()
     const parsed = JSON.parse(text)
-    const ver = typeof parsed?.spine === 'string'
-      ? parsed.spine
-      : typeof parsed?.skeleton?.spine === 'string'
-        ? parsed.skeleton.spine
-        : null
+    const ver = typeof parsed?.spine === 'string' ? parsed.spine : typeof parsed?.skeleton?.spine === 'string' ? parsed.skeleton.spine : null
     if (!ver) return
-
     const version = ver.trim()
     phaserStore.setDetectedSpineVersion(version)
-    // 4.1 -> wildcards; 4.2 -> exact
     const m = version.match(/^(\d+)\.(\d+)(?:\.(\d+))?/)
     let url = null
     if (m) {
       const major = m[1]
       const minor = m[2]
       const captured = m[0]
-      if (major === '4' && minor === '1') {
-        url = `https://unpkg.com/@esotericsoftware/spine-phaser@${major}.${minor}.*/dist/iife/spine-phaser.js`
-      } else {
-        url = `https://unpkg.com/@esotericsoftware/spine-phaser@${captured}/dist/iife/spine-phaser.js`
-      }
+      url = major === '4' && minor === '1'
+        ? `https://unpkg.com/@esotericsoftware/spine-phaser@${major}.${minor}.*/dist/iife/spine-phaser.js`
+        : `https://unpkg.com/@esotericsoftware/spine-phaser@${captured}/dist/iife/spine-phaser.js`
     }
-    // Reset any prior pending state; set again only if mismatch
     pendingRuntimeUrl.value = null
     pendingRuntimeVersion.value = null
-    // Suggest page reload to switch runtime
     if (url) {
       const params = new URLSearchParams(window.location.search)
       const current = params.get('spineVer') || ''
@@ -223,29 +174,14 @@ const reloadNow = async () => {
     if (files.value.jsonFile) selected.push(files.value.jsonFile)
     if (files.value.atlasFile) selected.push(files.value.atlasFile)
     if (files.value.pngFiles?.length) selected.push(...files.value.pngFiles)
-
-    // *** FIX: Await the save operation and log errors ***
-    if (selected.length > 0) {
-      await saveBundleToIDB(bundleId, selected)
-    }
-
+    if (selected.length > 0) await saveBundleToIDB(bundleId, selected)
     const names = selected.map((f) => f.name)
-    const info = {
-      ver: pendingRuntimeVersion.value,
-      url: pendingRuntimeUrl.value,
-      fileNames: names,
-      bundleId,
-      ts: Date.now(),
-    }
+    const info = { ver: pendingRuntimeVersion.value, url: pendingRuntimeUrl.value, fileNames: names, bundleId, ts: Date.now() }
     sessionStorage.setItem('spv.reloadInfo', JSON.stringify(info))
-
-    // *** FIX: Only navigate AFTER successful save ***
     const params = new URLSearchParams(window.location.search)
     params.set('spineVer', pendingRuntimeUrl.value)
     window.location.href = `${window.location.pathname}?${params.toString()}`
-
   } catch (e) {
-    // *** FIX: Add proper error handling ***
     console.error('Failed to save file bundle before reloading:', e)
     alert(t('uploader.reload_save_failed'))
   }
@@ -258,24 +194,10 @@ onMounted(() => {
       const info = JSON.parse(raw)
       postReloadInfo.value = info
       sessionStorage.removeItem('spv.reloadInfo')
-      // Attempt auto reapply immediately
       autoReapplyFromBundle()
     }
   } catch { }
 })
-
-const dismissPostReload = () => {
-  postReloadInfo.value = null
-}
-
-const copyNames = async () => {
-  if (!postReloadInfo.value?.fileNames?.length) return
-  try {
-    await navigator.clipboard.writeText(postReloadInfo.value.fileNames.join('\n'))
-    copyLabel.value = t('uploader.copied')
-    setTimeout(() => (copyLabel.value = 'Copy list'), 1500)
-  } catch { }
-}
 
 let _idb = null
 const idbOpen = async () => {
@@ -285,10 +207,7 @@ const idbOpen = async () => {
     req.onerror = () => reject(req.error)
     req.onupgradeneeded = (event) => {
       const db = event.target.result
-      // *** FIX: More robust object store creation ***
-      if (!db.objectStoreNames.contains('bundles')) {
-        db.createObjectStore('bundles')
-      }
+      if (!db.objectStoreNames.contains('bundles')) db.createObjectStore('bundles')
     }
     req.onsuccess = () => {
       _idb = req.result
@@ -297,36 +216,25 @@ const idbOpen = async () => {
   })
 }
 
-// ... (saveBundleToIDB and other IDB functions are correct as you wrote them) ...
 const saveBundleToIDB = async (id, fileList) => {
-  // Step 1: Prepare the entire payload *before* opening the transaction.
-  // This is the key change.
   const payload = await Promise.all(
     fileList.map(async (f) => ({
       name: f.name,
       type: f.type || '',
       lastModified: f.lastModified || Date.now(),
       data: await f.arrayBuffer(),
-    })),
+    }))
   )
-
-  // Step 2: Now that the data is ready, open the DB and start the transaction.
   const db = await idbOpen()
   const tx = db.transaction('bundles', 'readwrite')
   const store = tx.objectStore('bundles')
-
-  // Step 3: Execute the 'put' request and wait for the transaction to complete.
   return new Promise((resolve, reject) => {
-    // Set up transaction completion handlers first
     tx.oncomplete = () => resolve()
     tx.onabort = () => reject(tx.error || new Error('IDB transaction aborted'))
     tx.onerror = () => reject(tx.error || new Error('IDB transaction error'))
-
-    // Now make the request
     store.put(payload, id)
   })
 }
-
 
 const loadBundleFromIDB = async (id) => {
   const db = await idbOpen()
@@ -366,7 +274,6 @@ const waitForGameReady = async (timeoutMs = 15000) => {
 }
 
 const autoReapplyFromBundle = async () => {
-  autoReapplyError.value = ''
   if (!postReloadInfo.value?.bundleId) return
   try {
     autoReapplying.value = true
@@ -389,12 +296,10 @@ const autoReapplyFromBundle = async () => {
     files.value.pngFiles = pngs
 
     try {
-      // Temporarily clear the pending URL to prevent detectRuntimeFromJson from re-triggering a reload prompt
       const originalPendingUrl = pendingRuntimeUrl.value
       pendingRuntimeUrl.value = null
       await detectRuntimeFromJson(json)
       pendingRuntimeUrl.value = originalPendingUrl
-
       await waitForGameReady()
       loadAnimation()
       await deleteBundleFromIDB(bundleId)
@@ -405,8 +310,8 @@ const autoReapplyFromBundle = async () => {
     autoReapplying.value = false
   } catch (e) {
     autoReapplying.value = false
-    autoReapplyError.value = t('uploader.reapply_failed') + `: ${e.message}`
     console.error('Error during auto-reapply:', e)
+    alert(t('uploader.reapply_failed') + `\n\n${e.message}`)
   }
 }
 </script>
@@ -431,9 +336,7 @@ const autoReapplyFromBundle = async () => {
   cursor: pointer;
   padding: 20px;
   text-align: center;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 
   &.dragging {
     background: var(--color-gray-dark);
@@ -490,11 +393,11 @@ const autoReapplyFromBundle = async () => {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 8px 10px;
-}
 
-.runtime-reload .hint {
-  color: var(--color-gray);
-  font-size: 0.85em;
+  .hint {
+    color: var(--color-gray);
+    font-size: 0.85em;
+  }
 }
 
 .post-reload-tip {
@@ -502,19 +405,19 @@ const autoReapplyFromBundle = async () => {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 10px 12px;
-}
 
-.post-reload-tip .title {
-  font-weight: 600;
-  margin-bottom: 6px;
-}
+  .title {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
 
-.post-reload-tip ul {
-  margin: 6px 0 10px 16px;
-}
+  ul {
+    margin: 6px 0 10px 16px;
+  }
 
-.post-reload-tip .actions {
-  display: flex;
-  gap: 8px;
+  .actions {
+    display: flex;
+    gap: 8px;
+  }
 }
 </style>

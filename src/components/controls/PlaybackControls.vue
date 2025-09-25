@@ -7,15 +7,8 @@
       <label for="timescaleSlider">
         {{ t('playback.timescale') }} <span id="timescaleValue">{{ timescale.toFixed(1) }}x</span>
       </label>
-      <input
-        type="range"
-        id="timescaleSlider"
-        class="control-slider"
-        min="0"
-        max="2"
-        step="0.1"
-        v-model.number="timescale"
-      />
+      <input type="range" id="timescaleSlider" class="control-slider" min="0" max="2" step="0.1"
+        v-model.number="timescale" />
       <button @click="resetTimescale" class="control-button">{{ t('playback.reset') }}</button>
     </div>
   </div>
@@ -31,13 +24,10 @@ const { t } = useI18n()
 const timescale = ref(1.0)
 let lastKnownTimeScale = 1.0
 
-// Watch for changes in the timescale ref and apply them to the Phaser object.
-// This is a more declarative approach than using an @input handler.
 watch(timescale, (newScale) => {
   if (phaserStore.spineObject) {
     phaserStore.spineObject.animationState.timeScale = newScale
   }
-  // Keep track of the last speed that was > 0
   if (newScale > 0) {
     lastKnownTimeScale = newScale
   }
@@ -45,7 +35,6 @@ watch(timescale, (newScale) => {
 
 const pause = () => {
   if (phaserStore.spineObject) {
-    // Only update lastKnownTimeScale if we are actually pausing a moving animation
     const currentScale = phaserStore.spineObject.animationState.timeScale
     if (currentScale > 0) {
       lastKnownTimeScale = currentScale
@@ -63,7 +52,6 @@ const play = () => {
 }
 
 const resetTimescale = () => {
-  // Simply set the timescale ref. The watcher will handle the rest.
   timescale.value = 1.0
 }
 </script>
@@ -74,7 +62,7 @@ const resetTimescale = () => {
   flex-direction: column;
   gap: 15px;
 
-  & > label {
+  &>label {
     font-weight: 600;
     font-size: 1.1em;
     color: var(--color-white);
@@ -87,7 +75,7 @@ const resetTimescale = () => {
   gap: 10px;
   margin-top: 15px;
 
-  & > label {
+  &>label {
     font-size: 1em;
     font-weight: 500;
     display: flex;

@@ -35,7 +35,6 @@ import GitHubLink from './controls/GitHubLink.vue'
   box-shadow: 0 8px 30px var(--color-shadow);
   overflow-y: auto;
 
-  /* Use :deep to style the root element of child components */
   & :deep(> div) {
     border-top: 1px solid var(--color-border);
     padding-top: 25px;
