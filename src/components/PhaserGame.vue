@@ -27,7 +27,7 @@ const removeExistingSpineScripts = () => {
     ;[...new Set([...added, ...anySpine])].forEach((s) => s.parentElement?.removeChild(s))
   try {
     if (window && window.spine) delete window.spine
-  } catch { }
+  } catch {/*empty*/}
 }
 
 const buildUnpkgUrlFromVersion = (ver) => {

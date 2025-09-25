@@ -196,7 +196,7 @@ onMounted(() => {
       sessionStorage.removeItem('spv.reloadInfo')
       autoReapplyFromBundle()
     }
-  } catch { }
+  } catch {/*empty*/}
 })
 
 let _idb = null
