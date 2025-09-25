@@ -15,9 +15,10 @@
     "missing_files": "Please select all required files (.json, .atlas, and at least one .png).",
     "detected_runtime": "Detected spine version: {ver}",
     "runtime_reload_needed": "Reload required to apply.",
-    "reload_now": "Reload Now",
+    "reload_now": "Reload",
     "remember_files": "Don't worry, We'll reselect your files for you.",
-    "reapply_failed": "Auto reapply failed. Please select files again."
+    "reapply_failed": "Auto reapply failed. Please select files again.",
+    "file_missing": "file missing"
   },
   "multiskin": {
     "title": "Multi-Skin Selection",
@@ -63,5 +64,11 @@
   },
   "game": {
     "welcome": "Press Load to start viewing your spine."
+  },
+  "sections": {
+    "animation": "Animation Files",
+    "customization": "Customization",
+    "playback": "Playback & View",
+    "settings": "Settings"
   }
 }

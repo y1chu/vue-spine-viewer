@@ -1,18 +1,5 @@
 <template>
-  <div class="upload-section">
-    <label>{{ t('uploader.title') }}</label>
-
-    <div
-      class="drop-area"
-      :class="{ dragging: isDragging }"
-      @click="triggerFileInput"
-      @dragover.prevent="isDragging = true"
-      @dragleave="isDragging = false"
-      @drop.prevent="handleDrop"
-    >
-      {{ t('uploader.drag_or_click_hint') }}
-    </div>
-
+  <div class="file-uploader">
     <input
       ref="fileInputRef"
       type="file"
@@ -22,45 +9,38 @@
       @change="handleFileSelect"
     />
 
-    <label for="json-upload" class="control-button file-label">
-      <span class="file-button-text">{{ t('uploader.select_json') }}</span>
-      <span class="file-name-display">{{ jsonFileName }}</span>
-    </label>
-    <input
-      id="json-upload"
-      type="file"
-      accept=".json"
-      @change="(e) => handleFileChange(e, 'json')"
-      style="display: none"
-    />
+    <div
+      class="drop-area"
+      :class="{ dragging: isDragging }"
+      @click="triggerFileInput"
+      @dragover.prevent="isDragging = true"
+      @dragleave="isDragging = false"
+      @drop.prevent="handleDrop"
+    >
+      <div v-if="!hasFiles" class="prompt">
+        <div class="icon-upload"></div>
+        <p>{{ t('uploader.drag_or_click_hint') }}</p>
+        <span class="hint">Spine JSON / Atlas / PNG</span>
+      </div>
 
-    <label for="atlas-upload" class="control-button file-label">
-      <span class="file-button-text">{{ t('uploader.select_atlas') }}</span>
-      <span class="file-name-display">{{ atlasFileName }}</span>
-    </label>
-    <input
-      id="atlas-upload"
-      type="file"
-      accept=".atlas,.txt"
-      @change="(e) => handleFileChange(e, 'atlas')"
-      style="display: none"
-    />
+      <div v-else class="status-grid">
+        <div
+          v-for="status in fileStatuses"
+          :key="status.type"
+          class="file-status"
+          :class="{ valid: !!status.file }"
+        >
+          <div class="icon-file">{{ status.icon }}</div>
+          <div class="info">
+            <span class="type">{{ status.label }}</span>
+            <span class="name">{{ status.name || t('uploader.file_missing') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <label for="png-upload" class="control-button file-label">
-      <span class="file-button-text">{{ t('uploader.select_png') }}</span>
-      <span class="file-name-display">{{ pngFileName }}</span>
-    </label>
-    <input
-      id="png-upload"
-      type="file"
-      accept=".png,.pma,.pma.png"
-      multiple
-      @change="(e) => handleFileChange(e, 'png')"
-      style="display: none"
-    />
-
-    <div class="runtime-detected" v-if="detectedSpineVersion">
-      {{ t('uploader.detected_runtime', { ver: detectedSpineVersion }) }}
+    <div class="runtime-detected" v-if="phaserStore.detectedSpineVersion">
+      {{ t('uploader.detected_runtime', { ver: phaserStore.detectedSpineVersion }) }}
     </div>
 
     <div v-if="pendingRuntimeUrl" class="runtime-reload">
@@ -73,8 +53,8 @@
 
     <button
       @click="loadAnimation"
-      class="control-button load-button"
-      :disabled="Boolean(pendingRuntimeUrl)"
+      class="control-button"
+      :disabled="!allFilesReady || !!pendingRuntimeUrl"
       :title="
         pendingRuntimeUrl ? t('uploader.runtime_reload_needed', { ver: pendingRuntimeVersion }) : ''
       "
@@ -90,33 +70,51 @@ import { useI18n } from 'vue-i18n'
 import { phaserStore } from '@/store/phaserStore.js'
 
 const { t } = useI18n()
-
 const files = ref({ jsonFile: null, atlasFile: null, pngFiles: [] })
 const isDragging = ref(false)
 const fileInputRef = ref(null)
-
-const jsonFileName = computed(() => files.value.jsonFile?.name || '')
-const atlasFileName = computed(() => files.value.atlasFile?.name || '')
-const pngFileName = computed(() => {
-  const list = files.value.pngFiles || []
-  if (!list.length) return ''
-  return list.length === 1 ? list[0].name : `${list.length} files selected`
-})
-
-const detectedSpineVersion = computed(() => phaserStore.detectedSpineVersion)
-
 const pendingRuntimeUrl = ref(null)
 const pendingRuntimeVersion = ref(null)
 const postReloadInfo = ref(null)
-const autoReapplying = ref(false)
+
+const fileStatuses = computed(() => [
+  {
+    type: 'json',
+    label: '.json',
+    file: files.value.jsonFile,
+    name: files.value.jsonFile?.name,
+    icon: '📄',
+  },
+  {
+    type: 'atlas',
+    label: '.atlas / .txt',
+    file: files.value.atlasFile,
+    name: files.value.atlasFile?.name,
+    icon: '🗺️',
+  },
+  {
+    type: 'png',
+    label: '.png(s)',
+    file: files.value.pngFiles.length > 0,
+    name: files.value.pngFiles.length > 0 ? `${files.value.pngFiles.length} image(s)` : null,
+    icon: '🖼️',
+  },
+])
+
+const hasFiles = computed(
+  () => files.value.jsonFile || files.value.atlasFile || files.value.pngFiles.length > 0,
+)
+
+const allFilesReady = computed(
+  () => !!files.value.jsonFile && !!files.value.atlasFile && files.value.pngFiles.length > 0,
+)
 
 const triggerFileInput = () => fileInputRef.value?.click()
 
 const processFiles = (fileList) => {
-  files.value.jsonFile = null
-  files.value.atlasFile = null
-  files.value.pngFiles = []
   const newFiles = Array.from(fileList || [])
+  const newPngFiles = []
+
   for (const file of newFiles) {
     const name = file.name.toLowerCase()
     if (name.endsWith('.json')) {
@@ -125,8 +123,12 @@ const processFiles = (fileList) => {
     } else if (name.endsWith('.atlas') || name.endsWith('.txt')) {
       files.value.atlasFile = file
     } else if (name.endsWith('.png') || name.endsWith('.pma') || name.endsWith('.pma.png')) {
-      files.value.pngFiles.push(file)
+      newPngFiles.push(file)
     }
+  }
+
+  if (newPngFiles.length > 0) {
+    files.value.pngFiles = newPngFiles
   }
 }
 
@@ -139,19 +141,6 @@ const handleDrop = (event) => {
   isDragging.value = false
   const droppedFiles = event.dataTransfer.files
   if (droppedFiles?.length) processFiles(droppedFiles)
-}
-
-const handleFileChange = (event, type) => {
-  const fileList = event.target.files
-  if (!fileList || !fileList.length) return
-  if (type === 'json') {
-    files.value.jsonFile = fileList[0]
-    detectRuntimeFromJson(fileList[0])
-  } else if (type === 'atlas') {
-    files.value.atlasFile = fileList[0]
-  } else if (type === 'png') {
-    files.value.pngFiles = Array.from(fileList)
-  }
 }
 
 const loadAnimation = () => {
@@ -242,8 +231,8 @@ onMounted(() => {
       sessionStorage.removeItem('spv.reloadInfo')
       autoReapplyFromBundle()
     }
-  } catch {
-    /*empty*/
+  } catch (e) {
+    console.error('Failed to parse reload info from sessionStorage:', e)
   }
 })
 
@@ -327,7 +316,6 @@ const waitForGameReady = async (timeoutMs = 15000) => {
 const autoReapplyFromBundle = async () => {
   if (!postReloadInfo.value?.bundleId) return
   try {
-    autoReapplying.value = true
     const bundleId = postReloadInfo.value.bundleId
     const payload = await loadBundleFromIDB(bundleId)
     if (!payload || !payload.length) throw new Error('Bundle not found in IndexedDB')
@@ -367,9 +355,7 @@ const autoReapplyFromBundle = async () => {
         gameError,
       )
     }
-    autoReapplying.value = false
   } catch (e) {
-    autoReapplying.value = false
     console.error('Error during auto-reapply:', e)
     alert(t('uploader.reapply_failed') + `\n\n${e.message}`)
   }
@@ -377,109 +363,147 @@ const autoReapplyFromBundle = async () => {
 </script>
 
 <style lang="postcss" scoped>
-.upload-section {
+.file-uploader {
   display: flex;
   flex-direction: column;
   gap: 15px;
-
-  & > label {
-    color: var(--color-white);
-    font-size: 1.1em;
-    font-weight: 600;
-  }
 }
 
 .drop-area {
-  background: var(--color-section);
-  border: 2px dashed var(--color-gray-dark);
-  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+
+  background: var(--color-surface-light);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   padding: 20px;
   text-align: center;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
+  transition: all 0.2s ease-in-out;
+  color: var(--color-text-muted);
 
+  &:hover,
   &.dragging {
-    background: var(--color-gray-dark);
-    border-color: var(--color-red);
+    border-color: var(--color-primary);
+    background: var(--control-bg-hover);
+    transform: scale(1.02);
+  }
+
+  .prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    .icon-upload {
+      font-size: 2.5rem;
+      line-height: 1;
+      color: var(--color-primary);
+    }
+
+    p {
+      margin: 0;
+      font-weight: 600;
+      color: var(--color-text);
+      max-width: 200px;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+    }
   }
 }
 
-.file-label {
-  align-items: center;
-  background: var(--color-section);
-  border: 2px dashed var(--color-gray-dark);
+.status-grid {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+
+.file-status {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   padding: 10px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-border);
+  transition: all 0.2s;
 
-  &:hover {
-    background: var(--color-gray-dark);
-    border-color: var(--color-red);
+  &.valid {
+    border-left-color: var(--color-success);
+
+    .icon-file {
+      filter: grayscale(0);
+    }
+
+    .name {
+      color: var(--color-text);
+    }
   }
-}
 
-.file-button-text {
-  font-weight: 600;
-  pointer-events: none;
-}
+  .icon-file {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+    filter: grayscale(100%);
+    transition: filter 0.2s;
+  }
 
-.file-name-display {
-  color: var(--color-red-light);
-  font-size: 0.8em;
-  font-weight: 400;
-  height: 1.2em;
-  margin-top: 5px;
-  max-width: 100%;
-  overflow: hidden;
-  pointer-events: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  .info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 
-.runtime-detected {
-  background: var(--color-gray-dark);
-  border: 1px solid var(--color-gray);
-  color: var(--color-white);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 0.9em;
+    gap: 2px;
+  }
+
+  .type {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .name {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-muted);
+  }
 }
 
 .runtime-reload {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   align-items: center;
-  background: var(--color-section);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 8px 10px;
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  font-size: 0.9em;
+
+  .runtime-reload-text {
+    flex-grow: 1;
+  }
 
   .hint {
-    color: var(--color-gray);
-    font-size: 0.85em;
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.9em;
+    margin-top: 4px;
   }
 }
 
-.post-reload-tip {
-  background: var(--color-section);
+.runtime-detected {
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 10px 12px;
-
-  .title {
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  ul {
-    margin: 6px 0 10px 16px;
-  }
-
-  .actions {
-    display: flex;
-    gap: 8px;
-  }
+  color: var(--color-text-muted);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 0.9em;
+  text-align: center;
+  font-weight: 500;
 }
 </style>

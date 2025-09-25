@@ -9,7 +9,10 @@
     >
       {{ t('multitrack.open') }}
     </button>
-    <MultiTrackModal v-if="showModal" @close="showModal = false" />
+
+    <Teleport to="body">
+      <MultiTrackModal v-if="showModal" @close="showModal = false" />
+    </Teleport>
   </div>
 </template>
 
@@ -29,11 +32,5 @@ const showModal = ref(false)
   display: flex;
   flex-direction: column;
   gap: 15px;
-
-  & > label {
-    font-weight: 600;
-    font-size: 1.1em;
-    color: var(--color-white);
-  }
 }
 </style>

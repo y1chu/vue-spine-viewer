@@ -1,18 +1,17 @@
 <template>
   <div class="scale-control" v-if="phaserStore.isAnimationLoaded">
-    <label for="scaleSlider">
-      {{ t('scale.title') }} <span id="scaleValue">{{ scaleFactor.toFixed(1) }}</span>
+    <label for="scaleSlider" @click="resetScale" title="Click to reset">
+      {{ t('scale.title') }} <span>{{ scaleFactor.toFixed(1) }}</span>
     </label>
     <input
       type="range"
       id="scaleSlider"
       class="control-slider"
       min="0.1"
-      max="1.5"
+      max="2.0"
       step="0.1"
       v-model.number="scaleFactor"
     />
-    <button @click="resetScale" class="control-button">{{ t('scale.reset') }}</button>
   </div>
 </template>
 
@@ -44,50 +43,26 @@ const resetScale = () => {
   flex-direction: column;
   gap: 10px;
 
-  & > label {
-    font-weight: 600;
-    font-size: 1.1em;
-    color: var(--color-white);
+  > label {
+    font-weight: 500;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--color-primary-light);
+    }
+
+    span {
+      font-weight: 700;
+      color: var(--color-primary-light);
+      background-color: var(--color-surface);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9em;
+    }
   }
-}
-
-.control-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 8px;
-  background: var(--color-gray);
-  border-radius: 5px;
-  outline: none;
-  cursor: pointer;
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--color-red-light);
-    border-radius: 50%;
-  }
-
-  &::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: var(--color-red-light);
-    border-radius: 50%;
-    border: none;
-  }
-}
-
-#scaleValue {
-  font-weight: 600;
-  color: var(--color-red-light);
-  background-color: var(--color-section);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.9em;
 }
 </style>

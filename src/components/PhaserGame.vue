@@ -29,8 +29,8 @@ const removeExistingSpineScripts = () => {
   ;[...new Set([...added, ...anySpine])].forEach((s) => s.parentElement?.removeChild(s))
   try {
     if (window && window.spine) delete window.spine
-  } catch {
-    /*empty*/
+  } catch (e) {
+    console.warn('Could not delete window.spine', e)
   }
 }
 

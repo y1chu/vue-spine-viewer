@@ -1,7 +1,5 @@
 <template>
   <div class="background-controls">
-    <label>{{ t('background.customization') }}</label>
-
     <div class="control-row">
       <label for="bgColorPicker">{{ t('background.color') }}</label>
       <input
@@ -12,9 +10,8 @@
       />
     </div>
 
-    <label for="bg-image-upload" class="control-button file-label">
-      <span class="file-button-text">{{ t('background.upload_image') }}</span>
-      <span class="file-name-display">{{ backgroundImageName }}</span>
+    <label for="bg-image-upload" class="control-button file-button">
+      <span>{{ backgroundImageName || t('background.upload_image') }}</span>
     </label>
     <input
       id="bg-image-upload"
@@ -43,7 +40,6 @@ const { t } = useI18n()
 
 const defaultColor = '#111318'
 const backgroundColor = ref(defaultColor)
-const backgroundImageFile = ref(null)
 const backgroundImageName = ref('')
 
 const getGameScene = () => phaserStore.gameInstance?.scene.getScene('GameScene')
@@ -56,14 +52,12 @@ const updateBackgroundColor = (event) => {
 const handleBackgroundImageChange = (event) => {
   const file = event.target.files[0]
   if (!file) return
-  backgroundImageFile.value = file
   backgroundImageName.value = file.name
   const scene = getGameScene()
   if (scene) scene.setBackgroundImage(file)
 }
 
 const clearBackgroundImage = () => {
-  backgroundImageFile.value = null
   backgroundImageName.value = ''
   const scene = getGameScene()
   if (scene) scene.clearBackgroundImage()
@@ -77,71 +71,75 @@ const clearBackgroundImage = () => {
   display: flex;
   flex-direction: column;
   gap: 15px;
-
-  > label {
-    font-weight: 600;
-    font-size: 1.1em;
-    color: var(--color-white);
-  }
 }
 
 .control-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--color-surface);
+  padding: 5px 5px 5px 15px;
+  border-radius: var(--radius-md);
 
   > label {
     font-weight: 500;
   }
 
   > input[type='color'] {
-    width: 40px;
-    height: 40px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 32px;
+    height: 32px;
     border: none;
     padding: 0;
-    background: none;
+    background-color: transparent;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+
+    &::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    &::-webkit-color-swatch {
+      border: none;
+      border-radius: var(--radius-sm);
+    }
+
+    &::-moz-color-swatch {
+      border: none;
+      border-radius: var(--radius-sm);
+    }
   }
 }
 
-.file-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  background: var(--color-section);
-  border: 2px dashed var(--color-gray-dark);
+.file-button {
+  background: var(--control-bg);
+  text-align: center;
+  font-weight: 500;
 
   &:hover {
-    background: var(--color-gray-dark);
-    border-color: var(--color-red);
+    background: var(--control-bg-hover);
   }
-}
 
-.file-button-text {
-  font-weight: 600;
-  pointer-events: none;
-}
-
-.file-name-display {
-  font-size: 0.8em;
-  color: var(--color-red-light);
-  margin-top: 5px;
-  font-weight: 400;
-  pointer-events: none;
-  height: 1.2em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: inline-block;
+  }
 }
 
 .clear-button {
-  background-color: var(--color-gray-dark);
+  background: var(--control-bg);
+  opacity: 0.8;
+  font-weight: 500;
 
   &:hover {
-    background-color: var(--color-red);
+    background: var(--color-error);
+    opacity: 1;
   }
 }
 </style>
