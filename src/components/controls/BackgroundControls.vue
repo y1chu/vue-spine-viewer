@@ -4,17 +4,31 @@
 
     <div class="control-row">
       <label for="bgColorPicker">{{ t('background.color') }}</label>
-      <input type="color" id="bgColorPicker" v-model="backgroundColor" @input="updateBackgroundColor" />
+      <input
+        type="color"
+        id="bgColorPicker"
+        v-model="backgroundColor"
+        @input="updateBackgroundColor"
+      />
     </div>
 
     <label for="bg-image-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('background.upload_image') }}</span>
       <span class="file-name-display">{{ backgroundImageName }}</span>
     </label>
-    <input id="bg-image-upload" type="file" accept="image/png, image/jpeg" @change="handleBackgroundImageChange"
-      style="display: none" />
+    <input
+      id="bg-image-upload"
+      type="file"
+      accept="image/png, image/jpeg"
+      @change="handleBackgroundImageChange"
+      style="display: none"
+    />
 
-    <button v-if="backgroundImageName" @click="clearBackgroundImage" class="control-button clear-button">
+    <button
+      v-if="backgroundImageName"
+      @click="clearBackgroundImage"
+      class="control-button clear-button"
+    >
       {{ t('background.clear_image') }}
     </button>
   </div>
@@ -64,7 +78,7 @@ const clearBackgroundImage = () => {
   flex-direction: column;
   gap: 15px;
 
-  >label {
+  > label {
     font-weight: 600;
     font-size: 1.1em;
     color: var(--color-white);
@@ -76,11 +90,11 @@ const clearBackgroundImage = () => {
   justify-content: space-between;
   align-items: center;
 
-  >label {
+  > label {
     font-weight: 500;
   }
 
-  >input[type='color'] {
+  > input[type='color'] {
     width: 40px;
     height: 40px;
     border: none;

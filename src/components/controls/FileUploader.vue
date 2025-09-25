@@ -2,34 +2,62 @@
   <div class="upload-section">
     <label>{{ t('uploader.title') }}</label>
 
-    <div class="drop-area" :class="{ dragging: isDragging }" @click="triggerFileInput"
-      @dragover.prevent="isDragging = true" @dragleave="isDragging = false" @drop.prevent="handleDrop">
+    <div
+      class="drop-area"
+      :class="{ dragging: isDragging }"
+      @click="triggerFileInput"
+      @dragover.prevent="isDragging = true"
+      @dragleave="isDragging = false"
+      @drop.prevent="handleDrop"
+    >
       {{ t('uploader.drag_or_click_hint') }}
     </div>
-  
-    <input ref="fileInputRef" type="file" multiple accept=".json,.atlas,.txt,.png,.pma,.pma.png" style="display: none"
-      @change="handleFileSelect" />
+
+    <input
+      ref="fileInputRef"
+      type="file"
+      multiple
+      accept=".json,.atlas,.txt,.png,.pma,.pma.png"
+      style="display: none"
+      @change="handleFileSelect"
+    />
 
     <label for="json-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('uploader.select_json') }}</span>
       <span class="file-name-display">{{ jsonFileName }}</span>
     </label>
-    <input id="json-upload" type="file" accept=".json" @change="e => handleFileChange(e, 'json')"
-      style="display: none" />
+    <input
+      id="json-upload"
+      type="file"
+      accept=".json"
+      @change="(e) => handleFileChange(e, 'json')"
+      style="display: none"
+    />
 
     <label for="atlas-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('uploader.select_atlas') }}</span>
       <span class="file-name-display">{{ atlasFileName }}</span>
     </label>
-    <input id="atlas-upload" type="file" accept=".atlas,.txt" @change="e => handleFileChange(e, 'atlas')"
-      style="display: none" />
+    <input
+      id="atlas-upload"
+      type="file"
+      accept=".atlas,.txt"
+      @change="(e) => handleFileChange(e, 'atlas')"
+      style="display: none"
+    />
 
     <label for="png-upload" class="control-button file-label">
       <span class="file-button-text">{{ t('uploader.select_png') }}</span>
       <span class="file-name-display">{{ pngFileName }}</span>
     </label>
-    <input id="png-upload" type="file" accept=".png,.pma,.pma.png" multiple @change="e => handleFileChange(e, 'png')"
-      style="display: none" />
+    <input
+      id="png-upload"
+      type="file"
+      accept=".png,.pma,.pma.png"
+      multiple
+      @change="(e) => handleFileChange(e, 'png')"
+      style="display: none"
+    />
 
     <div class="runtime-detected" v-if="detectedSpineVersion">
       {{ t('uploader.detected_runtime', { ver: detectedSpineVersion }) }}
@@ -43,8 +71,14 @@
       <button class="control-button" @click="reloadNow">{{ t('uploader.reload_now') }}</button>
     </div>
 
-    <button @click="loadAnimation" class="control-button load-button" :disabled="Boolean(pendingRuntimeUrl)"
-      :title="pendingRuntimeUrl ? t('uploader.runtime_reload_needed', { ver: pendingRuntimeVersion }) : ''">
+    <button
+      @click="loadAnimation"
+      class="control-button load-button"
+      :disabled="Boolean(pendingRuntimeUrl)"
+      :title="
+        pendingRuntimeUrl ? t('uploader.runtime_reload_needed', { ver: pendingRuntimeVersion }) : ''
+      "
+    >
       {{ t('uploader.load') }}
     </button>
   </div>
@@ -137,7 +171,12 @@ const detectRuntimeFromJson = async (file) => {
   try {
     const text = await file.text()
     const parsed = JSON.parse(text)
-    const ver = typeof parsed?.spine === 'string' ? parsed.spine : typeof parsed?.skeleton?.spine === 'string' ? parsed.skeleton.spine : null
+    const ver =
+      typeof parsed?.spine === 'string'
+        ? parsed.spine
+        : typeof parsed?.skeleton?.spine === 'string'
+          ? parsed.skeleton.spine
+          : null
     if (!ver) return
     const version = ver.trim()
     phaserStore.setDetectedSpineVersion(version)
@@ -147,9 +186,10 @@ const detectRuntimeFromJson = async (file) => {
       const major = m[1]
       const minor = m[2]
       const captured = m[0]
-      url = major === '4' && minor === '1'
-        ? `https://unpkg.com/@esotericsoftware/spine-phaser@${major}.${minor}.*/dist/iife/spine-phaser.js`
-        : `https://unpkg.com/@esotericsoftware/spine-phaser@${captured}/dist/iife/spine-phaser.js`
+      url =
+        major === '4' && minor === '1'
+          ? `https://unpkg.com/@esotericsoftware/spine-phaser@${major}.${minor}.*/dist/iife/spine-phaser.js`
+          : `https://unpkg.com/@esotericsoftware/spine-phaser@${captured}/dist/iife/spine-phaser.js`
     }
     pendingRuntimeUrl.value = null
     pendingRuntimeVersion.value = null
@@ -176,7 +216,13 @@ const reloadNow = async () => {
     if (files.value.pngFiles?.length) selected.push(...files.value.pngFiles)
     if (selected.length > 0) await saveBundleToIDB(bundleId, selected)
     const names = selected.map((f) => f.name)
-    const info = { ver: pendingRuntimeVersion.value, url: pendingRuntimeUrl.value, fileNames: names, bundleId, ts: Date.now() }
+    const info = {
+      ver: pendingRuntimeVersion.value,
+      url: pendingRuntimeUrl.value,
+      fileNames: names,
+      bundleId,
+      ts: Date.now(),
+    }
     sessionStorage.setItem('spv.reloadInfo', JSON.stringify(info))
     const params = new URLSearchParams(window.location.search)
     params.set('spineVer', pendingRuntimeUrl.value)
@@ -196,7 +242,9 @@ onMounted(() => {
       sessionStorage.removeItem('spv.reloadInfo')
       autoReapplyFromBundle()
     }
-  } catch {/*empty*/}
+  } catch {
+    /*empty*/
+  }
 })
 
 let _idb = null
@@ -223,7 +271,7 @@ const saveBundleToIDB = async (id, fileList) => {
       type: f.type || '',
       lastModified: f.lastModified || Date.now(),
       data: await f.arrayBuffer(),
-    }))
+    })),
   )
   const db = await idbOpen()
   const tx = db.transaction('bundles', 'readwrite')
@@ -257,7 +305,9 @@ const deleteBundleFromIDB = async (id) => {
     req.onsuccess = () => resolve()
     req.onerror = () => reject(req.error)
   })
-  await new Promise((resolve) => { tx.oncomplete = () => resolve() })
+  await new Promise((resolve) => {
+    tx.oncomplete = () => resolve()
+  })
 }
 
 const waitForGameReady = async (timeoutMs = 15000) => {
@@ -266,7 +316,8 @@ const waitForGameReady = async (timeoutMs = 15000) => {
     const tick = () => {
       const scene = phaserStore.gameInstance?.scene?.getScene?.('GameScene')
       if (scene && scene.scene.isActive()) return resolve(true)
-      if (Date.now() - start > timeoutMs) return reject(new Error('Timeout waiting for game scene to be active'))
+      if (Date.now() - start > timeoutMs)
+        return reject(new Error('Timeout waiting for game scene to be active'))
       setTimeout(tick, 100)
     }
     tick()
@@ -281,7 +332,13 @@ const autoReapplyFromBundle = async () => {
     const payload = await loadBundleFromIDB(bundleId)
     if (!payload || !payload.length) throw new Error('Bundle not found in IndexedDB')
 
-    const rebuild = payload.map((p) => new File([new Blob([p.data], { type: p.type })], p.name, { type: p.type, lastModified: p.lastModified }))
+    const rebuild = payload.map(
+      (p) =>
+        new File([new Blob([p.data], { type: p.type })], p.name, {
+          type: p.type,
+          lastModified: p.lastModified,
+        }),
+    )
     const byExt = (name) => name.toLowerCase().split('.').pop()
     const json = rebuild.find((f) => byExt(f.name) === 'json')
     const atlas = rebuild.find((f) => ['atlas', 'txt'].includes(byExt(f.name)))
@@ -305,7 +362,10 @@ const autoReapplyFromBundle = async () => {
       await deleteBundleFromIDB(bundleId)
       postReloadInfo.value = null
     } catch (gameError) {
-      console.warn('Auto-reapply failed at game-ready stage, files are populated for manual load.', gameError)
+      console.warn(
+        'Auto-reapply failed at game-ready stage, files are populated for manual load.',
+        gameError,
+      )
     }
     autoReapplying.value = false
   } catch (e) {
@@ -322,7 +382,7 @@ const autoReapplyFromBundle = async () => {
   flex-direction: column;
   gap: 15px;
 
-  &>label {
+  & > label {
     color: var(--color-white);
     font-size: 1.1em;
     font-weight: 600;
@@ -336,7 +396,9 @@ const autoReapplyFromBundle = async () => {
   cursor: pointer;
   padding: 20px;
   text-align: center;
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
 
   &.dragging {
     background: var(--color-gray-dark);

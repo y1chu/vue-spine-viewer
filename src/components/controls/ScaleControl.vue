@@ -3,8 +3,15 @@
     <label for="scaleSlider">
       {{ t('scale.title') }} <span id="scaleValue">{{ scaleFactor.toFixed(1) }}</span>
     </label>
-    <input type="range" id="scaleSlider" class="control-slider" min="0.1" max="1.5" step="0.1"
-      v-model.number="scaleFactor" />
+    <input
+      type="range"
+      id="scaleSlider"
+      class="control-slider"
+      min="0.1"
+      max="1.5"
+      step="0.1"
+      v-model.number="scaleFactor"
+    />
     <button @click="resetScale" class="control-button">{{ t('scale.reset') }}</button>
   </div>
 </template>
@@ -37,7 +44,7 @@ const resetScale = () => {
   flex-direction: column;
   gap: 10px;
 
-  &>label {
+  & > label {
     font-weight: 600;
     font-size: 1.1em;
     color: var(--color-white);

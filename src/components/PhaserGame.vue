@@ -23,11 +23,15 @@ const loadSpineRuntime = (spineVersionUrl) =>
 
 const removeExistingSpineScripts = () => {
   const added = Array.from(document.querySelectorAll('script[data-spine-phaser="true"]'))
-  const anySpine = Array.from(document.querySelectorAll('script[src*="@esotericsoftware/spine-phaser"]'))
-    ;[...new Set([...added, ...anySpine])].forEach((s) => s.parentElement?.removeChild(s))
+  const anySpine = Array.from(
+    document.querySelectorAll('script[src*="@esotericsoftware/spine-phaser"]'),
+  )
+  ;[...new Set([...added, ...anySpine])].forEach((s) => s.parentElement?.removeChild(s))
   try {
     if (window && window.spine) delete window.spine
-  } catch {/*empty*/}
+  } catch {
+    /*empty*/
+  }
 }
 
 const buildUnpkgUrlFromVersion = (ver) => {
@@ -80,7 +84,7 @@ onMounted(() => {
       phaserStore.setGameInstance(null)
       phaserStore.cleanup()
       launchGameWithUrl(newUrl)
-    }
+    },
   )
 })
 

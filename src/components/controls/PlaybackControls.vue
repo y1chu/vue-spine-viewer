@@ -7,8 +7,15 @@
       <label for="timescaleSlider">
         {{ t('playback.timescale') }} <span id="timescaleValue">{{ timescale.toFixed(1) }}x</span>
       </label>
-      <input type="range" id="timescaleSlider" class="control-slider" min="0" max="2" step="0.1"
-        v-model.number="timescale" />
+      <input
+        type="range"
+        id="timescaleSlider"
+        class="control-slider"
+        min="0"
+        max="2"
+        step="0.1"
+        v-model.number="timescale"
+      />
       <button @click="resetTimescale" class="control-button">{{ t('playback.reset') }}</button>
     </div>
   </div>
@@ -62,7 +69,7 @@ const resetTimescale = () => {
   flex-direction: column;
   gap: 15px;
 
-  &>label {
+  & > label {
     font-weight: 600;
     font-size: 1.1em;
     color: var(--color-white);
@@ -75,7 +82,7 @@ const resetTimescale = () => {
   gap: 10px;
   margin-top: 15px;
 
-  &>label {
+  & > label {
     font-size: 1em;
     font-weight: 500;
     display: flex;
