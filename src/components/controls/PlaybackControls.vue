@@ -1,11 +1,9 @@
 <template>
   <div class="controls" v-if="phaserStore.isAnimationLoaded">
-    <label>{{ t('playback.title') }}</label>
-    <button @click="pause" class="control-button">{{ t('playback.pause') }}</button>
-    <button @click="play" class="control-button">{{ t('playback.play') }}</button>
     <div class="timescale-control">
       <label for="timescaleSlider">
-        {{ t('playback.timescale') }} <span id="timescaleValue">{{ timescale.toFixed(1) }}x</span>
+        {{ t('playback.timescale') }}
+        <span>{{ timescale.toFixed(1) }}x</span>
       </label>
       <input
         type="range"
@@ -16,7 +14,11 @@
         step="0.1"
         v-model.number="timescale"
       />
-      <button @click="resetTimescale" class="control-button">{{ t('playback.reset') }}</button>
+    </div>
+    <div class="button-group">
+      <button @click="play" class="control-button">▶</button>
+      <button @click="pause" class="control-button">❚❚</button>
+      <button @click="resetTimescale" class="control-button reset-button">⟲</button>
     </div>
   </div>
 </template>
@@ -31,13 +33,10 @@ const { t } = useI18n()
 const timescale = ref(1.0)
 let lastKnownTimeScale = 1.0
 
-// Watch for changes in the timescale ref and apply them to the Phaser object.
-// This is a more declarative approach than using an @input handler.
 watch(timescale, (newScale) => {
   if (phaserStore.spineObject) {
     phaserStore.spineObject.animationState.timeScale = newScale
   }
-  // Keep track of the last speed that was > 0
   if (newScale > 0) {
     lastKnownTimeScale = newScale
   }
@@ -45,7 +44,6 @@ watch(timescale, (newScale) => {
 
 const pause = () => {
   if (phaserStore.spineObject) {
-    // Only update lastKnownTimeScale if we are actually pausing a moving animation
     const currentScale = phaserStore.spineObject.animationState.timeScale
     if (currentScale > 0) {
       lastKnownTimeScale = currentScale
@@ -63,7 +61,6 @@ const play = () => {
 }
 
 const resetTimescale = () => {
-  // Simply set the timescale ref. The watcher will handle the rest.
   timescale.value = 1.0
 }
 </script>
@@ -72,64 +69,45 @@ const resetTimescale = () => {
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-
-  & > label {
-    font-weight: 600;
-    font-size: 1.1em;
-    color: var(--color-white);
-  }
+  gap: 20px;
 }
 
 .timescale-control {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 15px;
 
-  & > label {
-    font-size: 1em;
+  > label {
     font-weight: 500;
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    span {
+      font-weight: 700;
+      color: var(--color-primary-light);
+      background-color: var(--color-surface);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9em;
+    }
   }
 }
 
-#timescaleValue {
-  font-weight: 600;
-  color: var(--color-red-light);
-  background-color: var(--color-section);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.9em;
+.button-group {
+  display: flex;
+  gap: 10px;
 }
 
-.control-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 8px;
-  background: var(--color-gray);
-  border-radius: 5px;
-  outline: none;
-  cursor: pointer;
+.button-group > .control-button {
+  flex: 1;
+}
 
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--color-red-light);
-    border-radius: 50%;
-  }
+.reset-button {
+  background: var(--control-bg);
 
-  &::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: var(--color-red-light);
-    border-radius: 50%;
-    border: none;
+  &:hover {
+    background: var(--control-bg-hover);
   }
 }
 </style>

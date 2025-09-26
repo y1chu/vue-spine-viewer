@@ -12,7 +12,13 @@
     "select_png": "3. 選擇 .PNG 圖片",
     "drag_or_click_hint": "選擇或將所有檔案拖曳至此",
     "load": "載入動畫",
-    "missing_files": "請選擇所有必要的檔案 (.json、.atlas 及至少一個 .png)。"
+    "missing_files": "請選擇所有必要的檔案 (.json、.atlas 及至少一個 .png)。",
+    "detected_runtime": "偵測到的 Spine 版本：{ver}",
+    "runtime_reload_needed": "需要重新載入以套用。",
+    "reload_now": "重新載入",
+    "remember_files": "別擔心，我們會為您重新選擇檔案。",
+    "reapply_failed": "自動重新應用失敗，請再次選擇檔案。",
+    "file_missing": "缺少檔案"
   },
   "multiskin": {
     "title": "多皮膚選擇",
@@ -57,6 +63,12 @@
     "button": "前往 GitHub"
   },
   "game": {
-    "welcome": "請選擇 Spine 檔案以開始。"
+    "welcome": "請按下載入動畫以開始。"
+  },
+  "sections": {
+    "animation": "動畫檔案",
+    "customization": "自訂外觀",
+    "playback": "播放與檢視",
+    "settings": "設定"
   }
 }

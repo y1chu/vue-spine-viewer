@@ -11,7 +11,10 @@
             :value="skinName"
             v-model="selectedSkins"
           />
-          <label :for="`skin-checkbox-${skinName}`">{{ skinName }}</label>
+          <label :for="`skin-checkbox-${skinName}`">
+            <span class="custom-checkbox"></span>
+            {{ skinName }}
+          </label>
         </div>
       </div>
     </div>
@@ -20,7 +23,7 @@
       <button @click="clearSkins" class="control-button clear-button">
         {{ t('modal.clear_all') }}
       </button>
-      <button @click="$emit('close')" class="control-button close-button">
+      <button @click="$emit('close')" class="control-button">
         {{ t('modal.close') }}
       </button>
     </div>
@@ -39,7 +42,6 @@ const popupRef = ref(null)
 const handleRef = ref(null)
 useDraggable(popupRef, handleRef, 'multi-skin-modal')
 
-// Pre-select currently active skins
 const currentSkin = phaserStore.spineObject?.skeleton.skin
 const initialSkins =
   currentSkin?.componentSkinNames ||
@@ -54,7 +56,7 @@ const applySkins = () => {
     skeleton.setSkinByName(selectedSkins.value[0])
   } else {
     const newSkin = new spine.Skin('composite-skin')
-    newSkin.componentSkinNames = selectedSkins.value // Store for state restoration
+    newSkin.componentSkinNames = selectedSkins.value
     selectedSkins.value.forEach((skinName) => {
       const skinToAdd = skeleton.data.findSkin(skinName)
       if (skinToAdd) newSkin.addSkin(skinToAdd)
@@ -72,42 +74,74 @@ watch(selectedSkins, applySkins, { deep: true })
 </script>
 
 <style lang="postcss" scoped>
-/* Base popup styles are in main.css. These are specific to the skin modal. */
+.popup-button-container {
+  justify-content: center;
+}
+
 .skin-list {
-  list-style: none;
   padding: 10px;
   margin: 0;
-  max-height: 350px;
+  max-height: 40vh;
   overflow-y: auto;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
 }
 
 .skin-list-item {
   display: flex;
   align-items: center;
-  padding: 8px;
-  border-radius: 6px;
   transition: background-color 0.2s ease;
 
-  &:hover {
-    background-color: var(--color-section);
-  }
-
   & label {
-    margin-left: 10px;
-    font-weight: 400;
+    display: flex;
+    align-items: center;
+    padding: 12px 8px;
+    font-weight: 500;
     cursor: pointer;
     width: 100%;
     font-size: 1em;
+    border-radius: var(--radius-sm);
+
+    &:hover {
+      background-color: var(--color-surface-light);
+    }
   }
 
   & input[type='checkbox'] {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
+    display: none;
+  }
+
+  .custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    margin-right: 12px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  & input[type='checkbox']:checked + label .custom-checkbox {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+
+    &::after {
+      content: '✔';
+      color: white;
+      font-size: 14px;
+    }
+  }
+}
+
+.clear-button {
+  background: var(--control-bg);
+
+  &:hover {
+    background: var(--control-bg-hover);
   }
 }
 </style>

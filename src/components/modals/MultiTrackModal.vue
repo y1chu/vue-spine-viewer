@@ -13,7 +13,7 @@
               :key="anim.name"
               :value="anim.name"
             >
-              {{ anim.name }} ({{ anim.duration.toFixed(2) }} s)
+              {{ anim.name }} ({{ anim.duration.toFixed(2) }}s)
             </option>
           </select>
         </div>
@@ -24,7 +24,7 @@
       <button @click="clearTracks" class="control-button clear-button">
         {{ t('modal.clear_all') }}
       </button>
-      <button @click="$emit('close')" class="control-button close-button">
+      <button @click="$emit('close')" class="control-button">
         {{ t('modal.close') }}
       </button>
     </div>
@@ -47,7 +47,6 @@ useDraggable(popupRef, handleRef, 'multi-track-modal')
 const maxTracks = 5
 const trackSelections = ref([])
 
-// Initialize selections with current state
 const tracks = phaserStore.spineObject?.animationState.tracks
 for (let i = 0; i < maxTracks; i++) {
   trackSelections.value[i] = tracks?.[i]?.animation?.name || ''
@@ -73,17 +72,21 @@ watch(trackSelections, applyTracks, { deep: true })
 </script>
 
 <style lang="postcss" scoped>
+.popup-button-container {
+  justify-content: center;
+}
+
 .track-controls-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
 .track-control-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 10px;
-  justify-content: space-between;
+  gap: 15px;
 
   & label {
     flex-shrink: 0;
@@ -92,8 +95,11 @@ watch(trackSelections, applyTracks, { deep: true })
   }
 }
 
-.track-animation-select {
-  flex-grow: 1;
-  max-width: 220px;
+.clear-button {
+  background: var(--control-bg);
+
+  &:hover {
+    background: var(--control-bg-hover);
+  }
 }
 </style>

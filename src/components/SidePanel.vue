@@ -1,19 +1,31 @@
 <template>
-  <div class="side-panel">
-    <LanguageSelector />
-    <VersionSelector />
-    <FileUploader />
-    <BackgroundControls />
-    <MultiSkinSelector />
-    <MultiTrackSelector />
-    <ScaleControl />
-    <PlaybackControls />
+  <div class="control-panel">
+    <ControlSection :title="t('sections.animation')">
+      <FileUploader />
+    </ControlSection>
+
+    <ControlSection :title="t('sections.customization')">
+      <MultiSkinSelector />
+      <MultiTrackSelector />
+      <BackgroundControls />
+    </ControlSection>
+
+    <ControlSection :title="t('sections.playback')">
+      <ScaleControl />
+      <PlaybackControls />
+    </ControlSection>
+
+    <ControlSection :title="t('sections.settings')">
+      <LanguageSelector />
+    </ControlSection>
+
     <GitHubLink />
   </div>
 </template>
 
 <script setup>
-import VersionSelector from './controls/VersionSelector.vue'
+import { useI18n } from 'vue-i18n'
+import ControlSection from './controls/ControlSection.vue'
 import FileUploader from './controls/FileUploader.vue'
 import BackgroundControls from './controls/BackgroundControls.vue'
 import PlaybackControls from './controls/PlaybackControls.vue'
@@ -22,14 +34,18 @@ import MultiTrackSelector from './controls/MultiTrackSelector.vue'
 import ScaleControl from './controls/ScaleControl.vue'
 import LanguageSelector from './controls/LanguageSelector.vue'
 import GitHubLink from './controls/GitHubLink.vue'
+
+const { t } = useI18n()
 </script>
 
 <style lang="postcss" scoped>
-.side-panel {
-  width: 340px;
+.control-panel {
+  width: 360px;
   flex-shrink: 0;
-  background-color: var(--color-section);
-  border-radius: 16px;
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 25px;
   display: flex;
   flex-direction: column;
@@ -37,20 +53,15 @@ import GitHubLink from './controls/GitHubLink.vue'
   box-shadow: 0 8px 30px var(--color-shadow);
   overflow-y: auto;
 
-  /* Use :deep to style the root element of child components */
-  & :deep(> div) {
-    border-top: 1px solid var(--color-border);
-    padding-top: 25px;
-  }
+  scrollbar-width: none;
 
-  & :deep(> div:first-child) {
-    border-top: none;
-    padding-top: 0;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
 @media (max-width: 1024px) {
-  .side-panel {
+  .control-panel {
     width: 100%;
     max-width: 500px;
     margin: 0 auto;
