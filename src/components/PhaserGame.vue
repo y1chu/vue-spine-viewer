@@ -36,13 +36,24 @@ const removeExistingSpineScripts = () => {
 
 const buildUnpkgUrlFromVersion = (ver) => {
   if (!ver) return null
-  const raw = String(ver).trim()
+  let raw = String(ver).trim()
   const m = raw.match(/^(\d+)\.(\d+)(?:\.(\d+))?/)
   if (!m) return null
-  const major = m[1]
-  const minor = m[2]
-  const captured = m[0]
-  const versionForCdn = major === '4' && minor === '1' ? `${major}.${minor}.*` : captured
+
+  const major = Number(m[1])
+  const minor = Number(m[2])
+  const patch = Number(m[3] ?? '0')
+
+  // 4.1 stays wildcard, as before
+  // 4.2.x -> if < 65, pin to 4.2.65; else use the actual patch
+  let versionForCdn
+  if (major === 4 && minor === 1) {
+    versionForCdn = '4.1.*'
+  } else if (major === 4 && minor === 2) {
+    versionForCdn = patch < 65 ? '4.2.65' : `4.2.${patch}`
+  } else {
+    versionForCdn = `${major}.${minor}${m[3] ? '.' + patch : ''}`
+  }
   return `https://unpkg.com/@esotericsoftware/spine-phaser@${versionForCdn}/dist/iife/spine-phaser.js`
 }
 

@@ -172,22 +172,27 @@ const detectRuntimeFromJson = async (file) => {
     const m = version.match(/^(\d+)\.(\d+)(?:\.(\d+))?/)
     let url = null
     if (m) {
-      const major = m[1]
-      const minor = m[2]
-      const captured = m[0]
-      url =
-        major === '4' && minor === '1'
-          ? `https://unpkg.com/@esotericsoftware/spine-phaser@${major}.${minor}.*/dist/iife/spine-phaser.js`
-          : `https://unpkg.com/@esotericsoftware/spine-phaser@${captured}/dist/iife/spine-phaser.js`
+      const major = Number(m[1])
+      const minor = Number(m[2])
+      const patch = Number(m[3] ?? '0')
+      let resolved
+      if (major === 4 && minor === 1) {
+        resolved = '4.1.*'
+      } else if (major === 4 && minor === 2) {
+        resolved = patch < 65 ? '4.2.65' : `4.2.${patch}`
+      } else {
+        resolved = `${major}.${minor}${m[3] ? '.' + patch : ''}`
+      }
+      url = `https://unpkg.com/@esotericsoftware/spine-phaser@${resolved}/dist/iife/spine-phaser.js`
+      pendingRuntimeVersion.value = resolved
     }
     pendingRuntimeUrl.value = null
-    pendingRuntimeVersion.value = null
+    if (!pendingRuntimeVersion.value) pendingRuntimeVersion.value = null
     if (url) {
       const params = new URLSearchParams(window.location.search)
       const current = params.get('spineVer') || ''
       if (current !== url) {
         pendingRuntimeUrl.value = url
-        pendingRuntimeVersion.value = version
       }
     }
   } catch (e) {
