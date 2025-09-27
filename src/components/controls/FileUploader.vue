@@ -423,6 +423,7 @@ const autoReapplyFromBundle = async () => {
   display: grid;
   gap: 10px;
   text-align: left;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .file-status {
