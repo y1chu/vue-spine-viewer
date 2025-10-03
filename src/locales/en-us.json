@@ -41,7 +41,8 @@
     "pause": "Pause",
     "play": "Continue",
     "timescale": "Timescale",
-    "reset": "Reset Speed"
+    "reset": "Reset Speed",
+    "volume": "Volume"
   },
   "scale": {
     "title": "Viewer Scale",
@@ -70,5 +71,10 @@
     "customization": "Customization",
     "playback": "Playback & View",
     "settings": "Settings"
+  },
+  "audio": {
+    "title": "Event Audio",
+    "preview": "Preview",
+    "none": "No event audio found"
   }
 }

@@ -1,10 +1,10 @@
-<template>
+﻿<template>
   <div class="file-uploader">
     <input
       ref="fileInputRef"
       type="file"
       multiple
-      accept=".json,.atlas,.txt,.png,.pma,.pma.png"
+      accept=".json,.atlas,.txt,.png,.pma,.pma.png,.mp3,.ogg,.wav,.m4a,.aac"
       style="display: none"
       @change="handleFileSelect"
     />
@@ -20,7 +20,7 @@
       <div v-if="!hasFiles" class="prompt">
         <div class="icon-upload"></div>
         <p>{{ t('uploader.drag_or_click_hint') }}</p>
-        <span class="hint">Spine JSON / Atlas / PNG</span>
+        <span class="hint">Spine JSON / Atlas / PNG / Audio</span>
       </div>
 
       <div v-else class="status-grid">
@@ -68,9 +68,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { phaserStore } from '@/store/phaserStore.js'
+import { logError } from '@/utils/logError.js'
 
 const { t } = useI18n()
-const files = ref({ jsonFile: null, atlasFile: null, pngFiles: [] })
+const files = ref({ jsonFile: null, atlasFile: null, pngFiles: [], audioFiles: [] })
 const isDragging = ref(false)
 const fileInputRef = ref(null)
 const pendingRuntimeUrl = ref(null)
@@ -99,6 +100,13 @@ const fileStatuses = computed(() => [
     name: files.value.pngFiles.length > 0 ? `${files.value.pngFiles.length} image(s)` : null,
     icon: '🖼️',
   },
+  {
+    type: 'audio',
+    label: '.mp3/.ogg/.wav (optional)',
+    file: files.value.audioFiles.length > 0,
+    name: files.value.audioFiles.length > 0 ? `${files.value.audioFiles.length} audio file(s)` : 'optional',
+    icon: '🎵',
+  },
 ])
 
 const hasFiles = computed(
@@ -114,6 +122,7 @@ const triggerFileInput = () => fileInputRef.value?.click()
 const processFiles = (fileList) => {
   const newFiles = Array.from(fileList || [])
   const newPngFiles = []
+  const newAudioFiles = []
 
   for (const file of newFiles) {
     const name = file.name.toLowerCase()
@@ -124,11 +133,30 @@ const processFiles = (fileList) => {
       files.value.atlasFile = file
     } else if (name.endsWith('.png') || name.endsWith('.pma') || name.endsWith('.pma.png')) {
       newPngFiles.push(file)
+    } else if (
+      name.endsWith('.mp3') ||
+      name.endsWith('.ogg') ||
+      name.endsWith('.wav') ||
+      name.endsWith('.m4a') ||
+      name.endsWith('.aac')
+    ) {
+      newAudioFiles.push(file)
     }
   }
 
   if (newPngFiles.length > 0) {
     files.value.pngFiles = newPngFiles
+  }
+  if (newAudioFiles.length > 0) {
+    files.value.audioFiles = newAudioFiles
+  }
+  try {
+    phaserStore.setHasAudio(files.value.audioFiles?.length > 0)
+  } catch (err) {
+    logError('FileUploader.processFiles: update hasAudio', err)
+  }
+  if (newAudioFiles.length > 0) {
+    files.value.audioFiles = newAudioFiles
   }
 }
 
@@ -208,6 +236,7 @@ const reloadNow = async () => {
     if (files.value.jsonFile) selected.push(files.value.jsonFile)
     if (files.value.atlasFile) selected.push(files.value.atlasFile)
     if (files.value.pngFiles?.length) selected.push(...files.value.pngFiles)
+    if (files.value.audioFiles?.length) selected.push(...files.value.audioFiles)
     if (selected.length > 0) await saveBundleToIDB(bundleId, selected)
     const names = selected.map((f) => f.name)
     const info = {
@@ -339,11 +368,27 @@ const autoReapplyFromBundle = async () => {
       const n = f.name.toLowerCase()
       return n.endsWith('.png') || n.endsWith('.pma') || n.endsWith('.pma.png')
     })
+    const audios = rebuild.filter((f) => {
+      const n = f.name.toLowerCase()
+      return (
+        n.endsWith('.mp3') ||
+        n.endsWith('.ogg') ||
+        n.endsWith('.wav') ||
+        n.endsWith('.m4a') ||
+        n.endsWith('.aac')
+      )
+    })
     if (!json || !atlas || !pngs.length) throw new Error('Missing required files in bundle')
 
     files.value.jsonFile = json
     files.value.atlasFile = atlas
     files.value.pngFiles = pngs
+    files.value.audioFiles = audios
+    try {
+      phaserStore.setHasAudio(files.value.audioFiles?.length > 0)
+    } catch (err) {
+      logError('FileUploader.autoReapplyFromBundle: update hasAudio', err)
+    }
 
     try {
       const originalPendingUrl = pendingRuntimeUrl.value
