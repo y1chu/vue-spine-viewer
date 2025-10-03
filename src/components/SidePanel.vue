@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="control-panel">
     <ControlSection :title="t('sections.animation')">
       <FileUploader />
@@ -13,6 +13,7 @@
     <ControlSection :title="t('sections.playback')">
       <ScaleControl />
       <PlaybackControls />
+      <AudioControls />
     </ControlSection>
 
     <ControlSection :title="t('sections.settings')">
@@ -29,6 +30,7 @@ import ControlSection from './controls/ControlSection.vue'
 import FileUploader from './controls/FileUploader.vue'
 import BackgroundControls from './controls/BackgroundControls.vue'
 import PlaybackControls from './controls/PlaybackControls.vue'
+import AudioControls from './controls/AudioControls.vue'
 import MultiSkinSelector from './controls/MultiSkinSelector.vue'
 import MultiTrackSelector from './controls/MultiTrackSelector.vue'
 import ScaleControl from './controls/ScaleControl.vue'
