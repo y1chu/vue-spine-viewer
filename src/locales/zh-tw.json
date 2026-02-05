@@ -10,14 +10,61 @@
     "select_json": "1. 選擇 .JSON 檔案",
     "select_atlas": "2. 選擇 .ATLAS 檔案",
     "select_png": "3. 選擇 .PNG 圖片",
-    "drag_or_click_hint": "選擇或將所有檔案拖曳至此",
+    "drag_or_click_hint": "將所有檔案拖曳到這裡或點擊選取",
+    "file_types_hint": "Spine JSON / SKEL / BYTES / Atlas / PNG",
+    "load_format": "載入格式",
+    "format_json": "JSON",
+    "format_skel": "SKEL / BYTES",
+    "compare_mode": "以視覺方式比較 JSON 與 SKEL/BYTES",
+    "compare_requires": "比較模式需要 .json 與 .skel/.bytes，以及 .atlas 和 .png。",
+    "compare_view": "比較方式",
+    "compare_overlay": "重疊",
+    "compare_side_by_side": "左右並排",
+    "compare_legend_overlay": "重疊：JSON 在下、SKEL 在上",
+    "compare_legend_side_by_side": "並排：JSON 在左、SKEL 在右",
+    "compare_opacity": "重疊透明度",
+    "compare_json_tint": "JSON 著色",
+    "compare_skel_tint": "SKEL 著色",
+    "compare_metrics_title": "比較數值",
+    "compare_metrics_json": "JSON",
+    "compare_metrics_binary": "SKEL/BYTES",
+    "compare_metric_width": "寬度",
+    "compare_metric_height": "高度",
+    "compare_metric_x": "X",
+    "compare_metric_y": "Y",
+    "compare_diffs_title": "差異",
+    "compare_diffs_none": "未偵測到結構或附件差異。",
+    "compare_diff_scalar": "{label} 不同：{json} vs {skel}",
+    "compare_diff_names": "{label} 不同（數量 {json} vs {skel}）：JSON 專有 {jsonOnly}；SKEL 專有 {skelOnly}",
+    "compare_diff_anim_duration": "動畫「{name}」時長不同：{json} vs {skel}",
+    "compare_diff_anim_timelines": "動畫「{name}」時間軸數量不同：{json} vs {skel}",
+    "compare_diff_anim_timeline_types": "動畫「{name}」時間軸類型不同：JSON 專有 {jsonOnly}；SKEL 專有 {skelOnly}",
+    "compare_diff_skin_attachments": "皮膚「{name}」附件不同（數量 {json} vs {skel}）：JSON 專有 {jsonOnly}；SKEL 專有 {skelOnly}",
+    "compare_labels": {
+      "hash": "hash",
+      "version": "版本",
+      "width": "寬度",
+      "height": "高度",
+      "x": "X",
+      "y": "Y",
+      "bones": "骨骼",
+      "slots": "插槽",
+      "skins": "皮膚",
+      "animations": "動畫",
+      "events": "事件",
+      "ik": "IK 約束",
+      "transform": "變形約束",
+      "path": "路徑約束"
+    },
+    "compare_failed": "比較載入失敗：{msg}",
+    "compare_unavailable": "執行環境尚未載入，無法使用比較模式。",
     "load": "載入動畫",
-    "missing_files": "請選擇所有必要的檔案 (.json、.atlas 及至少一個 .png)。",
-    "detected_runtime": "偵測到的 Spine 版本：{ver}",
+    "missing_files": "請選取所有必要檔案（.json 或 .skel/.bytes、.atlas，至少一個 .png）。",
+    "detected_runtime": "偵測到 Spine 版本：{ver}",
     "runtime_reload_needed": "需要重新載入以套用。",
     "reload_now": "重新載入",
-    "remember_files": "別擔心，我們會為您重新選擇檔案。",
-    "reapply_failed": "自動重新應用失敗，請再次選擇檔案。",
+    "remember_files": "別擔心，我們會幫你重新選取檔案。",
+    "reapply_failed": "自動重套用失敗，請重新選取檔案。",
     "file_missing": "缺少檔案"
   },
   "multiskin": {
@@ -34,21 +81,21 @@
   "modal": {
     "select_skins": "選擇皮膚",
     "close": "關閉",
-    "clear_all": "清除所有"
+    "clear_all": "全部清除"
   },
   "playback": {
     "title": "播放控制",
     "pause": "暫停",
     "play": "繼續",
-    "timescale": "時間倍率",
+    "timescale": "速度倍率",
     "reset": "重設速度"
   },
   "scale": {
-    "title": "縮放調整",
-    "reset": "重設縮放"
+    "title": "顯示比例",
+    "reset": "重設比例"
   },
   "version": {
-    "title": "Spine 執行時版本",
+    "title": "Spine 執行版本",
     "spine41": "Spine 4.1",
     "spine42": "Spine 4.2",
     "reload": "以此版本重新載入"
@@ -60,14 +107,14 @@
   },
   "github": {
     "title": "意見回饋",
-    "button": "前往 GitHub"
+    "button": "在 GitHub 查看"
   },
   "game": {
-    "welcome": "請按下載入動畫以開始。"
+    "welcome": "按下載入開始觀看 Spine。"
   },
   "sections": {
     "animation": "動畫檔案",
-    "customization": "自訂外觀",
+    "customization": "自訂",
     "playback": "播放與檢視",
     "settings": "設定"
   }

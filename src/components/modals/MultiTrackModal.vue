@@ -9,7 +9,7 @@
           <select class="control-dropdown track-animation-select" v-model="trackSelections[i - 1]">
             <option value="">{{ t('multitrack.none') }}</option>
             <option
-              v-for="anim in phaserStore.spineObject?.skeleton.data.animations"
+              v-for="anim in animationOptions"
               :key="anim.name"
               :value="anim.name"
             >
@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { phaserStore } from '@/store/phaserStore.js'
 import { useDraggable } from '@/composables/useDraggable.js'
@@ -47,21 +47,41 @@ useDraggable(popupRef, handleRef, 'multi-track-modal')
 const maxTracks = 5
 const trackSelections = ref([])
 
-const tracks = phaserStore.spineObject?.animationState.tracks
+const getSpineObjects = () =>
+  phaserStore.spineObjects?.length
+    ? phaserStore.spineObjects
+    : phaserStore.spineObject
+      ? [phaserStore.spineObject]
+      : []
+
+const primaryObject = getSpineObjects()[0]
+const tracks = primaryObject?.animationState?.tracks
 for (let i = 0; i < maxTracks; i++) {
   trackSelections.value[i] = tracks?.[i]?.animation?.name || ''
 }
 
+const animationOptions = computed(() => {
+  const animations = primaryObject?.skeleton?.data?.animations || []
+  if ((phaserStore.spineObjects?.length || 0) <= 1) return animations
+  const allowed = new Set(phaserStore.animations || [])
+  return animations.filter((anim) => allowed.has(anim.name))
+})
+
 const applyTracks = () => {
-  const { animationState } = phaserStore.spineObject
-  for (let i = 0; i < maxTracks; i++) {
-    const selectedAnimation = trackSelections.value[i]
-    if (selectedAnimation) {
-      animationState.setAnimation(i, selectedAnimation, true)
-    } else {
-      animationState.setEmptyAnimation(i, 0.1)
+  const objects = getSpineObjects()
+  objects.forEach((obj) => {
+    const { animationState } = obj
+    for (let i = 0; i < maxTracks; i++) {
+      const selectedAnimation = trackSelections.value[i]
+      if (selectedAnimation) {
+        if (obj.skeleton.data.findAnimation(selectedAnimation)) {
+          animationState.setAnimation(i, selectedAnimation, true)
+        }
+      } else {
+        animationState.setEmptyAnimation(i, 0.1)
+      }
     }
-  }
+  })
 }
 
 const clearTracks = () => {

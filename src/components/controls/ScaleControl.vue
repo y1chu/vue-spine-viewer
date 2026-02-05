@@ -27,8 +27,8 @@ const scaleFactor = ref(phaserStore.scaleFactor)
 watch(scaleFactor, (newVal) => {
   phaserStore.setScaleFactor(newVal)
   const scene = phaserStore.gameInstance?.scene.getScene('GameScene')
-  if (scene && phaserStore.spineObject) {
-    scene.fitAndCenterSpineObject(phaserStore.spineObject)
+  if (scene?.refreshLayout) {
+    scene.refreshLayout()
   }
 })
 

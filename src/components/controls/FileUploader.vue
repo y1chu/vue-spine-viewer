@@ -4,7 +4,7 @@
       ref="fileInputRef"
       type="file"
       multiple
-      accept=".json,.atlas,.txt,.png,.pma,.pma.png"
+      accept=".json,.skel,.bytes,.atlas,.txt,.png,.pma,.pma.png"
       style="display: none"
       @change="handleFileSelect"
     />
@@ -20,7 +20,7 @@
       <div v-if="!hasFiles" class="prompt">
         <div class="icon-upload"></div>
         <p>{{ t('uploader.drag_or_click_hint') }}</p>
-        <span class="hint">Spine JSON / Atlas / PNG</span>
+        <span class="hint">{{ t('uploader.file_types_hint') }}</span>
       </div>
 
       <div v-else class="status-grid">
@@ -35,6 +35,119 @@
             <span class="type">{{ status.label }}</span>
             <span class="name">{{ status.name || t('uploader.file_missing') }}</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showLoadFormatToggle" class="format-select">
+      <label class="format-label">{{ t('uploader.load_format') }}</label>
+      <div class="format-toggle">
+        <button
+          type="button"
+          class="toggle-button"
+          :class="{ active: loadFormat === 'json' }"
+          @click="loadFormat = 'json'"
+        >
+          {{ t('uploader.format_json') }}
+        </button>
+        <button
+          type="button"
+          class="toggle-button"
+          :class="{ active: loadFormat === 'skel' }"
+          @click="loadFormat = 'skel'"
+        >
+          {{ t('uploader.format_skel') }}
+        </button>
+      </div>
+    </div>
+
+    <label class="compare-toggle">
+      <input type="checkbox" v-model="compareMode" />
+      <span>{{ t('uploader.compare_mode') }}</span>
+    </label>
+    <div v-if="compareMode && !compareReady" class="compare-hint">
+      {{ t('uploader.compare_requires') }}
+    </div>
+
+    <div v-if="compareMode" class="compare-layout">
+      <label class="format-label">{{ t('uploader.compare_view') }}</label>
+      <div class="format-toggle">
+        <button
+          type="button"
+          class="toggle-button"
+          :class="{ active: compareLayout === 'overlay' }"
+          @click="compareLayout = 'overlay'"
+        >
+          {{ t('uploader.compare_overlay') }}
+        </button>
+        <button
+          type="button"
+          class="toggle-button"
+          :class="{ active: compareLayout === 'side-by-side' }"
+          @click="compareLayout = 'side-by-side'"
+        >
+          {{ t('uploader.compare_side_by_side') }}
+        </button>
+      </div>
+      <div v-if="compareReady" class="compare-legend">{{ compareLegend }}</div>
+    </div>
+
+    <div v-if="compareMode && compareLayout === 'overlay'" class="compare-overlay-controls">
+      <label class="format-label">
+        {{ t('uploader.compare_opacity') }}
+        <span>{{ overlayOpacity.toFixed(2) }}</span>
+      </label>
+      <input
+        type="range"
+        class="control-slider"
+        min="0.1"
+        max="1"
+        step="0.05"
+        v-model.number="overlayOpacity"
+      />
+      <div class="compare-tint-row">
+        <label for="jsonTint">{{ t('uploader.compare_json_tint') }}</label>
+        <input id="jsonTint" type="color" v-model="jsonTint" />
+      </div>
+      <div class="compare-tint-row">
+        <label for="skelTint">{{ t('uploader.compare_skel_tint') }}</label>
+        <input id="skelTint" type="color" v-model="skelTint" />
+      </div>
+    </div>
+
+    <div v-if="compareMode && compareMetrics" class="compare-metrics">
+      <div class="compare-metrics-title">{{ t('uploader.compare_metrics_title') }}</div>
+      <div class="compare-metrics-grid">
+        <div class="compare-metrics-header"></div>
+        <div class="compare-metrics-header">{{ t('uploader.compare_metrics_json') }}</div>
+        <div class="compare-metrics-header">{{ t('uploader.compare_metrics_binary') }}</div>
+
+        <div class="compare-metrics-label">{{ t('uploader.compare_metric_width') }}</div>
+        <div class="compare-metrics-value">{{ formatMetric(compareMetrics.json.width) }}</div>
+        <div class="compare-metrics-value">{{ formatMetric(compareMetrics.skel.width) }}</div>
+
+        <div class="compare-metrics-label">{{ t('uploader.compare_metric_height') }}</div>
+        <div class="compare-metrics-value">{{ formatMetric(compareMetrics.json.height) }}</div>
+        <div class="compare-metrics-value">{{ formatMetric(compareMetrics.skel.height) }}</div>
+
+        <div class="compare-metrics-label">{{ t('uploader.compare_metric_x') }}</div>
+        <div class="compare-metrics-value">{{ formatMetric(compareMetrics.json.x) }}</div>
+        <div class="compare-metrics-value">{{ formatMetric(compareMetrics.skel.x) }}</div>
+
+        <div class="compare-metrics-label">{{ t('uploader.compare_metric_y') }}</div>
+        <div class="compare-metrics-value">{{ formatMetric(compareMetrics.json.y) }}</div>
+        <div class="compare-metrics-value">{{ formatMetric(compareMetrics.skel.y) }}</div>
+      </div>
+    </div>
+
+    <div v-if="compareMode && compareReport" class="compare-diffs">
+      <div class="compare-diffs-title">{{ t('uploader.compare_diffs_title') }}</div>
+      <div v-if="!compareDiffLines.length" class="compare-diffs-empty">
+        {{ t('uploader.compare_diffs_none') }}
+      </div>
+      <div v-else class="compare-diffs-lines">
+        <div v-for="(line, index) in compareDiffLines" :key="`diff-${index}`" class="compare-diffs-line">
+          {{ line }}
         </div>
       </div>
     </div>
@@ -61,28 +174,53 @@
     >
       {{ t('uploader.load') }}
     </button>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { phaserStore } from '@/store/phaserStore.js'
 
 const { t } = useI18n()
-const files = ref({ jsonFile: null, atlasFile: null, pngFiles: [] })
+const files = ref({
+  jsonFile: null,
+  skelFile: null,
+  bytesFile: null,
+  atlasFile: null,
+  pngFiles: [],
+})
 const isDragging = ref(false)
 const fileInputRef = ref(null)
 const pendingRuntimeUrl = ref(null)
 const pendingRuntimeVersion = ref(null)
 const postReloadInfo = ref(null)
+const loadFormat = ref('json')
+const compareMode = ref(false)
+const compareLayout = ref('overlay')
+const overlayOpacity = ref(0.6)
+const jsonTint = ref('#5ad1ff')
+const skelTint = ref('#ff8a5b')
+const compareMetrics = ref(null)
+const compareReport = ref(null)
+
+const skeletonDisplayName = computed(() => {
+  const names = []
+  if (files.value.jsonFile) names.push(files.value.jsonFile.name)
+  if (files.value.skelFile) names.push(files.value.skelFile.name)
+  if (files.value.bytesFile) names.push(files.value.bytesFile.name)
+  return names.length ? names.join(', ') : null
+})
+
+const binaryFile = computed(() => files.value.skelFile || files.value.bytesFile)
 
 const fileStatuses = computed(() => [
   {
-    type: 'json',
-    label: '.json',
-    file: files.value.jsonFile,
-    name: files.value.jsonFile?.name,
+    type: 'skeleton',
+    label: '.json / .skel / .bytes',
+    file: files.value.jsonFile || binaryFile.value,
+    name: skeletonDisplayName.value,
     icon: '📄',
   },
   {
@@ -102,24 +240,123 @@ const fileStatuses = computed(() => [
 ])
 
 const hasFiles = computed(
-  () => files.value.jsonFile || files.value.atlasFile || files.value.pngFiles.length > 0,
+  () =>
+    files.value.jsonFile ||
+    files.value.skelFile ||
+    files.value.bytesFile ||
+    files.value.atlasFile ||
+    files.value.pngFiles.length > 0,
 )
 
-const allFilesReady = computed(
-  () => !!files.value.jsonFile && !!files.value.atlasFile && files.value.pngFiles.length > 0,
+const hasSkeleton = computed(() => !!files.value.jsonFile || !!binaryFile.value)
+const hasAtlas = computed(() => !!files.value.atlasFile)
+const hasPngs = computed(() => files.value.pngFiles.length > 0)
+const compareReady = computed(
+  () => !!files.value.jsonFile && !!binaryFile.value && hasAtlas.value && hasPngs.value,
 )
+const allFilesReady = computed(() => {
+  if (!hasAtlas.value || !hasPngs.value) return false
+  if (compareMode.value) return !!files.value.jsonFile && !!binaryFile.value
+  return hasSkeleton.value
+})
+
+const showLoadFormatToggle = computed(
+  () => !compareMode.value && !!files.value.jsonFile && !!binaryFile.value,
+)
+const resolvedLoadFormat = computed(() => {
+  if (loadFormat.value === 'skel' && binaryFile.value) return 'skel'
+  if (loadFormat.value === 'json' && files.value.jsonFile) return 'json'
+  if (files.value.jsonFile) return 'json'
+  if (binaryFile.value) return 'skel'
+  return null
+})
+
+const compareLegend = computed(() => {
+  if (!compareReady.value) return ''
+  return compareLayout.value === 'overlay'
+    ? t('uploader.compare_legend_overlay')
+    : t('uploader.compare_legend_side_by_side')
+})
+
+const formatNameList = (list, max = 6) => {
+  if (!list?.length) return t('uploader.compare_none')
+  const shown = list.slice(0, max)
+  const suffix = list.length > max ? ` +${list.length - max}` : ''
+  return `${shown.join(', ')}${suffix}`
+}
+
+const formatMetric = (value) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '-'
+  return value.toFixed(2)
+}
+
+const compareDiffLines = computed(() => {
+  if (!compareReport.value?.diffs?.length) return []
+  return compareReport.value.diffs.map((diff) => {
+    switch (diff.type) {
+      case 'scalar':
+        return t('uploader.compare_diff_scalar', {
+          label: t(`uploader.compare_labels.${diff.field}`),
+          json: diff.json ?? '-',
+          skel: diff.skel ?? '-',
+        })
+      case 'names':
+        return t('uploader.compare_diff_names', {
+          label: t(`uploader.compare_labels.${diff.field}`),
+          json: diff.jsonCount,
+          skel: diff.skelCount,
+          jsonOnly: formatNameList(diff.jsonOnly),
+          skelOnly: formatNameList(diff.skelOnly),
+        })
+      case 'anim-duration':
+        return t('uploader.compare_diff_anim_duration', {
+          name: diff.name,
+          json: Number.isFinite(diff.json) ? diff.json.toFixed(3) : diff.json,
+          skel: Number.isFinite(diff.skel) ? diff.skel.toFixed(3) : diff.skel,
+        })
+      case 'anim-timelines':
+        return t('uploader.compare_diff_anim_timelines', {
+          name: diff.name,
+          json: diff.json,
+          skel: diff.skel,
+        })
+      case 'anim-timeline-types':
+        return t('uploader.compare_diff_anim_timeline_types', {
+          name: diff.name,
+          jsonOnly: formatNameList(diff.jsonOnly),
+          skelOnly: formatNameList(diff.skelOnly),
+        })
+      case 'skin-attachments':
+        return t('uploader.compare_diff_skin_attachments', {
+          name: diff.name,
+          json: diff.json,
+          skel: diff.skel,
+          jsonOnly: formatNameList(diff.jsonOnly),
+          skelOnly: formatNameList(diff.skelOnly),
+        })
+      default:
+        return JSON.stringify(diff)
+    }
+  })
+})
 
 const triggerFileInput = () => fileInputRef.value?.click()
 
 const processFiles = (fileList) => {
   const newFiles = Array.from(fileList || [])
   const newPngFiles = []
+  compareMetrics.value = null
+  compareReport.value = null
 
   for (const file of newFiles) {
     const name = file.name.toLowerCase()
     if (name.endsWith('.json')) {
       files.value.jsonFile = file
       detectRuntimeFromJson(file)
+    } else if (name.endsWith('.skel')) {
+      files.value.skelFile = file
+    } else if (name.endsWith('.bytes')) {
+      files.value.bytesFile = file
     } else if (name.endsWith('.atlas') || name.endsWith('.txt')) {
       files.value.atlasFile = file
     } else if (name.endsWith('.png') || name.endsWith('.pma') || name.endsWith('.pma.png')) {
@@ -143,17 +380,53 @@ const handleDrop = (event) => {
   if (droppedFiles?.length) processFiles(droppedFiles)
 }
 
-const loadAnimation = () => {
+const loadAnimation = async () => {
   if (pendingRuntimeUrl.value) {
     alert(t('uploader.runtime_reload_needed', { ver: pendingRuntimeVersion.value }))
     return
   }
-  if (!files.value.jsonFile || !files.value.atlasFile || !files.value.pngFiles?.length) {
+  if (!allFilesReady.value) {
     alert(t('uploader.missing_files'))
     return
   }
   const gameScene = phaserStore.gameInstance?.scene.getScene('GameScene')
-  if (gameScene) gameScene.loadAndDisplaySpine(files.value)
+  if (!gameScene) return
+
+  if (compareMode.value) {
+    if (!compareReady.value) {
+      alert(t('uploader.compare_requires'))
+      return
+    }
+    if (typeof gameScene.loadAndDisplayCompare !== 'function') {
+      alert(t('uploader.compare_unavailable'))
+      return
+    }
+    try {
+      const result = await gameScene.loadAndDisplayCompare(files.value, {
+        layout: compareLayout.value,
+        appearance: {
+          overlayOpacity: overlayOpacity.value,
+          jsonTint: jsonTint.value,
+          skelTint: skelTint.value,
+        },
+      })
+      compareMetrics.value = result?.metrics || gameScene.getCompareMetrics?.() || null
+      compareReport.value = result?.report || gameScene.getCompareReport?.() || null
+    } catch (e) {
+      const msg = e?.message || String(e)
+      compareMetrics.value = null
+      compareReport.value = null
+      alert(t('uploader.compare_failed', { msg }))
+    }
+    return
+  }
+
+  const format = resolvedLoadFormat.value
+  if (!format) {
+    alert(t('uploader.missing_files'))
+    return
+  }
+  gameScene.loadAndDisplaySpine(files.value, { format })
 }
 
 const detectRuntimeFromJson = async (file) => {
@@ -206,6 +479,8 @@ const reloadNow = async () => {
     const bundleId = Date.now().toString()
     const selected = []
     if (files.value.jsonFile) selected.push(files.value.jsonFile)
+    if (files.value.skelFile) selected.push(files.value.skelFile)
+    if (files.value.bytesFile) selected.push(files.value.bytesFile)
     if (files.value.atlasFile) selected.push(files.value.atlasFile)
     if (files.value.pngFiles?.length) selected.push(...files.value.pngFiles)
     if (selected.length > 0) await saveBundleToIDB(bundleId, selected)
@@ -226,6 +501,29 @@ const reloadNow = async () => {
     alert(t('uploader.reload_save_failed'))
   }
 }
+
+watch(compareLayout, (value) => {
+  if (!compareMode.value) return
+  const scene = phaserStore.gameInstance?.scene.getScene('GameScene')
+  if (scene?.setCompareLayout) {
+    scene.setCompareLayout(value)
+  }
+})
+
+watch([overlayOpacity, jsonTint, skelTint], ([opacity, json, skel]) => {
+  if (!compareMode.value) return
+  const scene = phaserStore.gameInstance?.scene.getScene('GameScene')
+  if (scene?.setCompareAppearance) {
+    scene.setCompareAppearance({ overlayOpacity: opacity, jsonTint: json, skelTint: skel })
+  }
+})
+
+watch(compareMode, (value) => {
+  if (!value) {
+    compareMetrics.value = null
+    compareReport.value = null
+  }
+})
 
 onMounted(() => {
   try {
@@ -332,23 +630,29 @@ const autoReapplyFromBundle = async () => {
           lastModified: p.lastModified,
         }),
     )
+
     const byExt = (name) => name.toLowerCase().split('.').pop()
     const json = rebuild.find((f) => byExt(f.name) === 'json')
+    const skel = rebuild.find((f) => byExt(f.name) === 'skel')
+    const bytes = rebuild.find((f) => byExt(f.name) === 'bytes')
     const atlas = rebuild.find((f) => ['atlas', 'txt'].includes(byExt(f.name)))
     const pngs = rebuild.filter((f) => {
       const n = f.name.toLowerCase()
       return n.endsWith('.png') || n.endsWith('.pma') || n.endsWith('.pma.png')
     })
-    if (!json || !atlas || !pngs.length) throw new Error('Missing required files in bundle')
+    if ((!json && !skel && !bytes) || !atlas || !pngs.length)
+      throw new Error('Missing required files in bundle')
 
-    files.value.jsonFile = json
+    files.value.jsonFile = json || null
+    files.value.skelFile = skel || null
+    files.value.bytesFile = bytes || null
     files.value.atlasFile = atlas
     files.value.pngFiles = pngs
 
     try {
       const originalPendingUrl = pendingRuntimeUrl.value
       pendingRuntimeUrl.value = null
-      await detectRuntimeFromJson(json)
+      if (json) await detectRuntimeFromJson(json)
       pendingRuntimeUrl.value = originalPendingUrl
       await waitForGameReady()
       loadAnimation()
@@ -477,6 +781,197 @@ const autoReapplyFromBundle = async () => {
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--color-text-muted);
+  }
+}
+
+.format-select,
+.compare-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.format-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.format-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.toggle-button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--color-primary);
+  }
+
+  &.active {
+    border-color: var(--color-primary);
+    background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.compare-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--color-text);
+
+  input {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.compare-hint {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.compare-legend {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.compare-metrics {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+
+.compare-metrics-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.compare-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+  align-items: center;
+}
+
+.compare-metrics-header {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.compare-metrics-label {
+  color: var(--color-text-muted);
+}
+
+.compare-metrics-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.compare-diffs {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+
+.compare-diffs-title {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.compare-diffs-empty {
+  color: var(--color-text-muted);
+}
+
+.compare-diffs-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.compare-diffs-line {
+  color: var(--color-text);
+}
+
+.compare-overlay-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .format-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    span {
+      font-weight: 700;
+      color: var(--color-primary-light);
+      background-color: var(--color-surface);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85em;
+    }
+  }
+
+  input[type='range'] {
+    margin-top: -2px;
+  }
+}
+
+.compare-tint-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-surface);
+  padding: 6px 8px 6px 12px;
+  border-radius: var(--radius-md);
+
+  > label {
+    font-weight: 500;
+  }
+
+  > input[type='color'] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 32px;
+    height: 32px;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+
+    &::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    &::-webkit-color-swatch {
+      border: none;
+      border-radius: var(--radius-sm);
+    }
+
+    &::-moz-color-swatch {
+      border: none;
+      border-radius: var(--radius-sm);
+    }
   }
 }
 

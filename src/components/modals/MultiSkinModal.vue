@@ -42,28 +42,39 @@ const popupRef = ref(null)
 const handleRef = ref(null)
 useDraggable(popupRef, handleRef, 'multi-skin-modal')
 
-const currentSkin = phaserStore.spineObject?.skeleton.skin
+const getSpineObjects = () =>
+  phaserStore.spineObjects?.length
+    ? phaserStore.spineObjects
+    : phaserStore.spineObject
+      ? [phaserStore.spineObject]
+      : []
+
+const primaryObject = getSpineObjects()[0]
+const currentSkin = primaryObject?.skeleton?.skin
 const initialSkins =
   currentSkin?.componentSkinNames ||
   (currentSkin && currentSkin.name !== 'default' ? [currentSkin.name] : [])
 const selectedSkins = ref(initialSkins)
 
 const applySkins = () => {
-  const { skeleton } = phaserStore.spineObject
-  if (selectedSkins.value.length === 0) {
-    skeleton.setSkin(null)
-  } else if (selectedSkins.value.length === 1) {
-    skeleton.setSkinByName(selectedSkins.value[0])
-  } else {
-    const newSkin = new spine.Skin('composite-skin')
-    newSkin.componentSkinNames = selectedSkins.value
-    selectedSkins.value.forEach((skinName) => {
-      const skinToAdd = skeleton.data.findSkin(skinName)
-      if (skinToAdd) newSkin.addSkin(skinToAdd)
-    })
-    skeleton.setSkin(newSkin)
-  }
-  skeleton.setSlotsToSetupPose()
+  const objects = getSpineObjects()
+  objects.forEach((obj) => {
+    const { skeleton } = obj
+    if (selectedSkins.value.length === 0) {
+      skeleton.setSkin(null)
+    } else if (selectedSkins.value.length === 1) {
+      skeleton.setSkinByName(selectedSkins.value[0])
+    } else {
+      const newSkin = new spine.Skin('composite-skin')
+      newSkin.componentSkinNames = selectedSkins.value
+      selectedSkins.value.forEach((skinName) => {
+        const skinToAdd = skeleton.data.findSkin(skinName)
+        if (skinToAdd) newSkin.addSkin(skinToAdd)
+      })
+      skeleton.setSkin(newSkin)
+    }
+    skeleton.setSlotsToSetupPose()
+  })
 }
 
 const clearSkins = () => {

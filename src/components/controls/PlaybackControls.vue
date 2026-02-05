@@ -32,32 +32,42 @@ const { t } = useI18n()
 
 const timescale = ref(1.0)
 let lastKnownTimeScale = 1.0
+const getSpineObjects = () =>
+  phaserStore.spineObjects?.length
+    ? phaserStore.spineObjects
+    : phaserStore.spineObject
+      ? [phaserStore.spineObject]
+      : []
 
 watch(timescale, (newScale) => {
-  if (phaserStore.spineObject) {
-    phaserStore.spineObject.animationState.timeScale = newScale
-  }
+  getSpineObjects().forEach((obj) => {
+    obj.animationState.timeScale = newScale
+  })
   if (newScale > 0) {
     lastKnownTimeScale = newScale
   }
 })
 
 const pause = () => {
-  if (phaserStore.spineObject) {
-    const currentScale = phaserStore.spineObject.animationState.timeScale
-    if (currentScale > 0) {
-      lastKnownTimeScale = currentScale
-    }
-    phaserStore.spineObject.animationState.timeScale = 0
-    timescale.value = 0
+  const objects = getSpineObjects()
+  if (!objects.length) return
+  const currentScale = objects[0].animationState.timeScale
+  if (currentScale > 0) {
+    lastKnownTimeScale = currentScale
   }
+  objects.forEach((obj) => {
+    obj.animationState.timeScale = 0
+  })
+  timescale.value = 0
 }
 
 const play = () => {
-  if (phaserStore.spineObject) {
-    phaserStore.spineObject.animationState.timeScale = lastKnownTimeScale
-    timescale.value = lastKnownTimeScale
-  }
+  const objects = getSpineObjects()
+  if (!objects.length) return
+  objects.forEach((obj) => {
+    obj.animationState.timeScale = lastKnownTimeScale
+  })
+  timescale.value = lastKnownTimeScale
 }
 
 const resetTimescale = () => {
