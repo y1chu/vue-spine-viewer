@@ -16,6 +16,11 @@ export class GameScene extends Phaser.Scene {
     }
     this.compareMetrics = null
     this.compareReport = null
+    this.layoutOffset = { x: 0, y: 0 }
+    this.isDraggingLayout = false
+    this.dragPointerId = null
+    this.dragStartPointer = { x: 0, y: 0 }
+    this.dragStartOffset = { x: 0, y: 0 }
   }
 
   create() {
@@ -34,13 +39,80 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5)
 
     this.scale.on('resize', this.handleResize, this)
+    this.input.on('pointerdown', this.handlePointerDown, this)
+    this.input.on('pointermove', this.handlePointerMove, this)
+    this.input.on('pointerup', this.handlePointerUp, this)
+    this.input.on('pointerupoutside', this.handlePointerUp, this)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.handleResize, this)
+      this.input.off('pointerdown', this.handlePointerDown, this)
+      this.input.off('pointermove', this.handlePointerMove, this)
+      this.input.off('pointerup', this.handlePointerUp, this)
+      this.input.off('pointerupoutside', this.handlePointerUp, this)
     })
   }
 
   handleResize() {
     this.refreshLayout()
+  }
+
+  resetLayoutOffset() {
+    this.layoutOffset = { x: 0, y: 0 }
+    this.isDraggingLayout = false
+    this.dragPointerId = null
+  }
+
+  getLoadedSpineObjects() {
+    if (phaserStore.spineObjects?.length) return phaserStore.spineObjects
+    if (phaserStore.spineObject) return [phaserStore.spineObject]
+    return []
+  }
+
+  isPointerInsideSpineObject(pointer, spineObj) {
+    if (!pointer || !spineObj?.active) return false
+    const bounds = this.getSpineBounds(spineObj)
+    const scaleX = Number(spineObj.scaleX) || 1
+    const scaleY = Number(spineObj.scaleY) || 1
+    const left = spineObj.x + bounds.offset.x * scaleX
+    const top = spineObj.y + bounds.offset.y * scaleY
+    const right = left + bounds.size.x * scaleX
+    const bottom = top + bounds.size.y * scaleY
+    const minX = Math.min(left, right)
+    const maxX = Math.max(left, right)
+    const minY = Math.min(top, bottom)
+    const maxY = Math.max(top, bottom)
+    return pointer.x >= minX && pointer.x <= maxX && pointer.y >= minY && pointer.y <= maxY
+  }
+
+  handlePointerDown(pointer) {
+    if (!pointer) return
+    if (typeof pointer.button === 'number' && pointer.button !== 0) return
+    const spineObjs = this.getLoadedSpineObjects()
+    if (!spineObjs.length) return
+    const isInside = spineObjs.some((obj) => this.isPointerInsideSpineObject(pointer, obj))
+    if (!isInside) return
+    this.isDraggingLayout = true
+    this.dragPointerId = pointer.id
+    this.dragStartPointer = { x: pointer.x, y: pointer.y }
+    this.dragStartOffset = { ...this.layoutOffset }
+  }
+
+  handlePointerMove(pointer) {
+    if (!this.isDraggingLayout || this.dragPointerId !== pointer?.id) return
+    const deltaX = pointer.x - this.dragStartPointer.x
+    const deltaY = pointer.y - this.dragStartPointer.y
+    this.layoutOffset = {
+      x: this.dragStartOffset.x + deltaX,
+      y: this.dragStartOffset.y + deltaY,
+    }
+    this.refreshLayout()
+  }
+
+  handlePointerUp(pointer) {
+    if (!this.isDraggingLayout) return
+    if (pointer && this.dragPointerId !== pointer.id) return
+    this.isDraggingLayout = false
+    this.dragPointerId = null
   }
 
   getSpineBounds(spineObj) {
@@ -63,6 +135,19 @@ export class GameScene extends Phaser.Scene {
     const centerYRelative = bounds.offset.y + bounds.size.y / 2
     spineObj.x = centerX - centerXRelative * scale
     spineObj.y = centerY - centerYRelative * scale
+  }
+
+  getCompareBounds(spineObj, fallbackBounds) {
+    const data = spineObj?.skeleton?.data
+    const width = Number.isFinite(data?.width) && data.width > 0 ? data.width : fallbackBounds.size.x
+    const height =
+      Number.isFinite(data?.height) && data.height > 0 ? data.height : fallbackBounds.size.y
+    const x = Number.isFinite(data?.x) ? data.x : fallbackBounds.offset.x
+    const y = Number.isFinite(data?.y) ? data.y : fallbackBounds.offset.y
+    return {
+      offset: { x, y },
+      size: { x: width, y: height },
+    }
   }
 
   applyDefaultSkin(spineObj) {
@@ -159,6 +244,30 @@ export class GameScene extends Phaser.Scene {
       return
     }
     if (typeof spineObj.clearTint === 'function') spineObj.clearTint()
+  }
+
+  setObjectBlendMode(spineObj, mode) {
+    if (!spineObj) return
+    if (typeof spineObj.setBlendMode === 'function') {
+      spineObj.setBlendMode(mode)
+      return
+    }
+    if ('blendMode' in spineObj) {
+      spineObj.blendMode = mode
+    }
+  }
+
+  computeCompareObjectScale(baseScale, runtimeBounds, compareBounds) {
+    const ratios = []
+    if (runtimeBounds?.size?.x > 0 && compareBounds?.size?.x > 0) {
+      ratios.push(compareBounds.size.x / runtimeBounds.size.x)
+    }
+    if (runtimeBounds?.size?.y > 0 && compareBounds?.size?.y > 0) {
+      ratios.push(compareBounds.size.y / runtimeBounds.size.y)
+    }
+    const validRatios = ratios.filter((value) => Number.isFinite(value) && value > 0)
+    const ratio = validRatios.length ? Math.min(...validRatios) : 1
+    return baseScale * ratio
   }
 
   buildCompareMetrics(jsonObj, skelObj) {
@@ -392,6 +501,7 @@ export class GameScene extends Phaser.Scene {
         obj.setDepth(index + 1)
         const tint = index === 0 ? this.compareAppearance?.jsonTint : this.compareAppearance?.skelTint
         this.applyTint(obj, tint)
+        this.setObjectBlendMode(obj, Phaser.BlendModes.NORMAL)
       })
       return
     }
@@ -399,14 +509,22 @@ export class GameScene extends Phaser.Scene {
       this.setObjectAlpha(obj, 1)
       obj.setDepth(1)
       this.applyTint(obj, null)
+      this.setObjectBlendMode(obj, Phaser.BlendModes.NORMAL)
     })
   }
 
   layoutCompareSpineObjects(spineObjs, layout) {
     if (!spineObjs?.length) return
-    const boundsList = spineObjs.map((obj) => this.getSpineBounds(obj))
-    const maxWidth = Math.max(...boundsList.map((b) => b.size.x || 0))
-    const maxHeight = Math.max(...boundsList.map((b) => b.size.y || 0))
+    const runtimeBoundsList = spineObjs.map((obj) => this.getSpineBounds(obj))
+    const compareBoundsList = spineObjs.map((obj, index) =>
+      this.getCompareBounds(obj, runtimeBoundsList[index]),
+    )
+    const compareCenterXList = compareBoundsList.map((bounds) => bounds.offset.x + bounds.size.x / 2)
+    const compareCenterYList = compareBoundsList.map((bounds) => bounds.offset.y + bounds.size.y / 2)
+    const compareAnchorX = (Math.min(...compareCenterXList) + Math.max(...compareCenterXList)) / 2
+    const compareAnchorY = (Math.min(...compareCenterYList) + Math.max(...compareCenterYList)) / 2
+    const maxWidth = Math.max(...compareBoundsList.map((bounds) => bounds.size.x || 0))
+    const maxHeight = Math.max(...compareBoundsList.map((bounds) => bounds.size.y || 0))
     if (maxWidth <= 0 || maxHeight <= 0) return
 
     const gap = 40
@@ -415,35 +533,39 @@ export class GameScene extends Phaser.Scene {
       ? Math.max(10, (this.scale.width - gap) / 2)
       : this.scale.width
     const targetHeight = this.scale.height
-    const scale = this.computeScaleForBounds(
+    const baseScale = this.computeScaleForBounds(
       { size: { x: maxWidth, y: maxHeight } },
       targetWidth,
       targetHeight,
     )
 
-    const centerY = this.cameras.main.centerY
+    const centerY = this.cameras.main.centerY + this.layoutOffset.y
     const centersX = isSideBySide
       ? [
-          this.cameras.main.centerX - (targetWidth / 2 + gap / 2),
-          this.cameras.main.centerX + (targetWidth / 2 + gap / 2),
+          this.cameras.main.centerX + this.layoutOffset.x - (targetWidth / 2 + gap / 2),
+          this.cameras.main.centerX + this.layoutOffset.x + (targetWidth / 2 + gap / 2),
         ]
-      : [this.cameras.main.centerX, this.cameras.main.centerX]
+      : [this.cameras.main.centerX + this.layoutOffset.x, this.cameras.main.centerX + this.layoutOffset.x]
 
     spineObjs.forEach((obj, index) => {
-      const bounds = boundsList[index]
       const centerX = centersX[Math.min(index, centersX.length - 1)]
-      this.positionSpineObject(obj, bounds, centerX, centerY, scale)
+      const runtimeBounds = runtimeBoundsList[index]
+      const compareBounds = compareBoundsList[index]
+      const scale = this.computeCompareObjectScale(baseScale, runtimeBounds, compareBounds)
+      const compareCenterX = compareBounds.offset.x + compareBounds.size.x / 2
+      const compareCenterY = compareBounds.offset.y + compareBounds.size.y / 2
+      const relativeCenterX = compareCenterX - compareAnchorX
+      const relativeCenterY = compareCenterY - compareAnchorY
+      obj.setScale(scale)
+      obj.x = centerX - relativeCenterX * scale
+      obj.y = centerY - relativeCenterY * scale
     })
 
     this.applyCompareVisuals(spineObjs, layout)
   }
 
   refreshLayout() {
-    const spineObjs = phaserStore.spineObjects?.length
-      ? phaserStore.spineObjects
-      : phaserStore.spineObject
-        ? [phaserStore.spineObject]
-        : []
+    const spineObjs = this.getLoadedSpineObjects()
     if (!spineObjs.length) return
     if (phaserStore.compareLayout && spineObjs.length > 1) {
       this.layoutCompareSpineObjects(spineObjs, phaserStore.compareLayout)
@@ -531,6 +653,7 @@ export class GameScene extends Phaser.Scene {
     activeObjectUrls.length = 0
     this.compareMetrics = null
     this.compareReport = null
+    this.resetLayoutOffset()
 
     const format = options.format || (spineFiles.jsonFile ? 'json' : 'skel')
     if (!format) throw new Error('Missing skeleton file')
@@ -586,6 +709,7 @@ export class GameScene extends Phaser.Scene {
     activeObjectUrls.length = 0
     this.compareMetrics = null
     this.compareReport = null
+    this.resetLayoutOffset()
 
     if (!spineFiles.jsonFile || !(spineFiles.skelFile || spineFiles.bytesFile)) {
       throw new Error('Both .json and a binary (.skel/.bytes) file are required for compare mode')
@@ -689,7 +813,13 @@ export class GameScene extends Phaser.Scene {
     if (!spineObj) return
     const bounds = this.getSpineBounds(spineObj)
     const scale = this.computeScaleForBounds(bounds, this.scale.width, this.scale.height)
-    this.positionSpineObject(spineObj, bounds, this.cameras.main.centerX, this.cameras.main.centerY, scale)
+    this.positionSpineObject(
+      spineObj,
+      bounds,
+      this.cameras.main.centerX + this.layoutOffset.x,
+      this.cameras.main.centerY + this.layoutOffset.y,
+      scale,
+    )
   }
 
   setBackgroundColor(hexColor) {

@@ -279,7 +279,7 @@ const compareLegend = computed(() => {
 })
 
 const formatNameList = (list, max = 6) => {
-  if (!list?.length) return t('uploader.compare_none')
+  if (!list?.length) return '-'
   const shown = list.slice(0, max)
   const suffix = list.length > max ? ` +${list.length - max}` : ''
   return `${shown.join(', ')}${suffix}`
